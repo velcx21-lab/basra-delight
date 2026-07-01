@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بصرة ديلايت — قسم التدريب</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#F4F5F7;color:#1A1A2E;direction:rtl;min-height:100vh;}
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0D1B3E 0%,#1A2F5A 100%);}
+.login-box{background:#fff;border-radius:20px;padding:40px 36px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.login-logo{text-align:center;margin-bottom:28px;}
+.login-logo .brand{font-size:22px;font-weight:700;color:#0D1B3E;}
+.login-logo .sub{font-size:12px;color:#888;margin-top:4px;}
+.login-field{margin-bottom:14px;}
+.login-field label{font-size:11px;color:#888;display:block;margin-bottom:4px;}
+.login-field input{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;direction:rtl;}
+.login-field input:focus{outline:none;border-color:#C8962E;}
+.login-btn{width:100%;padding:12px;background:#0D1B3E;color:#C8962E;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+.login-btn:hover{background:#1A2F5A;}
+.login-err{font-size:12px;color:#c00;text-align:center;margin-top:10px;min-height:18px;}
+.topbar{background:#0D1B3E;border-bottom:4px solid #C8962E;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.topbar-brand{font-size:16px;font-weight:700;color:#C8962E;}
+.topbar-sub{font-size:11px;color:#FFF3DC;margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.user-badge{font-size:12px;color:#FFF3DC;background:rgba(255,255,255,0.1);padding:5px 12px;border-radius:20px;}
+.btn-logout{background:transparent;border:1px solid #C8962E33;color:#C8962E;font-size:12px;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:inherit;}
+.topbar-btn{background:#C8962E;color:#fff;font-size:12px;padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;}
+.container{max-width:1100px;margin:0 auto;padding:20px 16px;}
+.emp-container{max-width:700px;margin:0 auto;padding:20px 16px;}
+.card{background:#fff;border-radius:12px;border:1px solid #E8E8E8;padding:18px;margin-bottom:14px;}
+.card-title{font-size:14px;font-weight:700;color:#0D1B3E;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.card-title::before{content:'';display:inline-block;width:4px;height:16px;background:#C8962E;border-radius:2px;}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:#fff;border-radius:12px;padding:16px;text-align:center;border:1px solid #E8E8E8;}
+.stat-label{font-size:11px;color:#888;margin-bottom:4px;}
+.stat-value{font-size:22px;font-weight:700;color:#0D1B3E;}
+.stat-value.green{color:#1A6B3C;}
+.stat-value.red{color:#8B1A1A;}
+.main-grid{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start;}
+input,select,textarea{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;color:#1A1A2E;background:#fff;direction:rtl;margin-bottom:8px;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#C8962E;}
+textarea{resize:none;}
+label{font-size:11px;color:#888;display:block;margin-bottom:3px;}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;}
+.btn-primary{background:#0D1B3E;color:#C8962E;width:100%;}
+.btn-primary:hover{background:#1A2F5A;}
+.btn-gold{background:#C8962E;color:#fff;width:100%;}
+.btn-gold:hover{background:#A87820;}
+.btn-sm{padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;border-radius:6px;border:1px solid #ddd;background:#f5f5f5;color:#555;}
+.btn-danger{border-color:#e88;background:#fff0f0;color:#c00;}
+.emp-item{padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:4px;border:1px solid transparent;transition:all 0.15s;}
+.emp-item:hover{background:#FFF3DC;}
+.emp-item.active{background:#0D1B3E;color:#fff;}
+.emp-avatar{width:36px;height:36px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#185FA5;flex-shrink:0;}
+.emp-item.active .emp-avatar{background:#C8962E33;color:#C8962E;}
+.emp-info{flex:1;}
+.emp-name{font-size:13px;font-weight:600;}
+.emp-meta{font-size:11px;color:#888;}
+.emp-item.active .emp-meta{color:#FFF3DC;}
+.emp-score{font-size:13px;font-weight:700;color:#C8962E;}
+.session-row{border-top:1px solid #f0f0f0;padding:10px 0;display:flex;align-items:flex-start;gap:12px;}
+.session-score{min-width:46px;text-align:center;}
+.session-score .num{font-size:20px;font-weight:700;}
+.session-score .denom{font-size:10px;color:#888;}
+.session-info{flex:1;}
+.session-note{font-size:11px;color:#888;margin-top:3px;font-style:italic;}
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;display:inline-block;margin:2px;}
+.badge-blue{background:#E6F1FB;color:#185FA5;}
+.badge-gray{background:#f0f0f0;color:#555;}
+.badge-gold{background:#FFF3DC;color:#8B6310;}
+.badge-green{background:#E8F5EE;color:#1A6B3C;}
+.badge-red{background:#FFF0F0;color:#8B1A1A;}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.summary-card{background:#F4F5F7;border-radius:10px;padding:12px;text-align:center;}
+.summary-card .s-label{font-size:10px;color:#888;margin-bottom:3px;}
+.summary-card .s-val{font-size:16px;font-weight:700;color:#0D1B3E;}
+.all-table{width:100%;border-collapse:collapse;font-size:13px;}
+.all-table th{background:#0D1B3E;color:#C8962E;padding:9px 10px;text-align:right;font-weight:600;}
+.all-table td{padding:9px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+.all-table tr:hover td{background:#FAFAFA;}
+.score-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-weight:700;font-size:12px;}
+.score-high{background:#E8F5EE;color:#1A6B3C;}
+.score-mid{background:#FFF3DC;color:#8B6310;}
+.score-low{background:#FFF0F0;color:#8B1A1A;}
+.score-none{background:#f0f0f0;color:#888;}
+.creds-card{background:#FFF3DC;border:1px solid #C8962E55;border-radius:10px;padding:10px;margin-top:6px;font-size:12px;}
+.creds-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.creds-label{color:#8B6310;font-weight:600;font-size:11px;}
+.creds-val{font-family:monospace;background:#fff;padding:2px 7px;border-radius:5px;color:#0D1B3E;font-size:12px;font-weight:700;}
+.axis-header{font-size:12px;font-weight:700;color:#0D1B3E;margin:12px 0 6px;padding-right:8px;border-right:3px solid #C8962E;}
+.criteria-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:7px;margin-bottom:3px;}
+.criteria-row:nth-child(odd){background:#FFF8EC;}
+.criteria-row:nth-child(even){background:#F5F5F5;}
+.criteria-label{font-size:11px;color:#1A1A2E;flex:1;}
+.criteria-pts{font-size:10px;color:#888;min-width:45px;text-align:center;}
+.criteria-score{display:flex;gap:3px;}
+.score-dot{width:26px;height:26px;border-radius:50%;border:1.5px solid #ddd;background:#fff;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#888;}
+.score-dot.selected{background:#0D1B3E;color:#C8962E;border-color:#0D1B3E;}
+.score-dot.partial{background:#C8962E;color:#fff;border-color:#C8962E;}
+.total-bar{background:#0D1B3E;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin:12px 0 10px;}
+.total-label{font-size:12px;color:#FFF3DC;font-weight:700;}
+.vn-btn{width:100%;text-align:right;font-size:11px;padding:5px 7px;border-radius:6px;cursor:pointer;margin-bottom:3px;border:1px solid;}
+.vn-btn.pos{background:#E8F5EE;color:#1A6B3C;border-color:#B8DFC8;}
+.vn-btn.neg{background:#FFF0F0;color:#8B1A1A;border-color:#F0C0C0;}
+.vn-btn.active{opacity:0.4;}
+.vn-pill{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:2px 7px;border-radius:20px;cursor:pointer;margin:2px;}
+.vn-pill.pos{background:#E8F5EE;color:#1A6B3C;}
+.vn-pill.neg{background:#FFF0F0;color:#8B1A1A;}
+.error-type-btn{width:100%;text-align:right;padding:10px 14px;border-radius:8px;margin-bottom:6px;font-size:13px;font-weight:600;cursor:pointer;border:2px solid transparent;font-family:inherit;opacity:0.75;}
+.error-type-btn.zone{background:#E6F1FB;color:#185FA5;border-color:#C0D8F0;}
+.error-type-btn.item{background:#FFF3DC;color:#8B6310;border-color:#E8D0A0;}
+.error-type-btn.c{background:#FFF0F0;color:#8B1A1A;border-color:#F0C0C0;}
+.error-type-btn.other{background:#F0F0FF;color:#4A4A8B;border-color:#C0C0E8;}
+.error-type-btn.delivery{background:#E8F5EE;color:#1A6B3C;border-color:#B8DFC8;}
+.error-type-btn.selected{opacity:1;box-shadow:0 0 0 3px #C8962E;}
+.empty{text-align:center;padding:2rem;color:#aaa;font-size:13px;}
+.notif{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0D1B3E;color:#C8962E;padding:10px 24px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;}
+.notif.show{opacity:1;}
+.loading-overlay{position:fixed;inset:0;background:rgba(13,27,62,0.7);display:none;align-items:center;justify-content:center;z-index:9999;}
+.loading-spinner{width:48px;height:48px;border:4px solid #C8962E33;border-top-color:#C8962E;border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.emp-header{background:linear-gradient(135deg,#0D1B3E,#1A2F5A);padding:24px;text-align:center;}
+.emp-avatar-big{width:64px;height:64px;border-radius:50%;background:#C8962E33;border:3px solid #C8962E;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#C8962E;margin:0 auto 10px;}
+.emp-header-name{font-size:20px;font-weight:700;color:#fff;}
+.emp-header-meta{font-size:12px;color:#FFF3DC;margin-top:3px;}
+.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+.metric{background:#F4F5F7;border-radius:10px;padding:12px;text-align:center;}
+.metric-label{font-size:10px;color:#888;margin-bottom:3px;}
+.metric-val{font-size:20px;font-weight:700;color:#0D1B3E;}
+.metric-val.green{color:#1A6B3C;}
+.metric-val.orange{color:#C8962E;}
+.metric-val.red{color:#8B1A1A;}
+.final-score-card{background:linear-gradient(135deg,#0D1B3E,#1A2F5A);border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;}
+.final-score-val{font-size:48px;font-weight:700;color:#C8962E;}
+.top3-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.top3-card{background:#fff;border-radius:12px;border:2px solid #E8E8E8;padding:14px;text-align:center;}
+.top3-card.gold{border-color:#C8962E;background:#FFF8EC;}
+.top3-card.silver{border-color:#A0A0B0;background:#F8F8FA;}
+.top3-card.bronze{border-color:#B87333;background:#FFF5EE;}
+.top3-rank{font-size:24px;margin-bottom:4px;}
+.top3-name{font-size:13px;font-weight:700;color:#0D1B3E;}
+.top3-score{font-size:18px;font-weight:700;color:#C8962E;margin-top:4px;}
+/* VIEWER MODE — hide all edit/add/delete controls */
+.viewer-mode .btn-danger,
+.viewer-mode .xl-del-btn,
+.viewer-mode #lv-save-btn,
+.viewer-mode button[onclick*="delete"],
+.viewer-mode button[onclick*="save"],
+.viewer-mode button[onclick*="Edit"],
+.viewer-mode button[onclick*="addEmployee"],
+.viewer-mode button[onclick*="resetQuiz"],
+.viewer-mode #emp-panel .btn-gold,
+.viewer-mode #emp-panel input,
+.viewer-mode #emp-panel select,
+.viewer-mode #emp-panel textarea,
+.viewer-mode .score-dot,
+.viewer-mode .vn-btn,
+.viewer-mode .error-type-btn {
+  pointer-events:none!important;
+  opacity:0.45!important;
+}
+.viewer-mode .creds-card{display:none!important;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-day-header{text-align:center;font-size:11px;font-weight:700;color:#888;padding:4px 0;}
+.cal-day{text-align:center;padding:8px 4px;border-radius:8px;font-size:13px;cursor:pointer;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.cal-day.empty{background:transparent;cursor:default;}
+.cal-day.no-error{background:#F4F5F7;color:#555;}
+.cal-day.no-error:hover{background:#E8E8E8;}
+.cal-day.has-error{background:#FFF0F0;color:#8B1A1A;font-weight:700;}
+.cal-day.has-error:hover{background:#FFE0E0;}
+.cal-day.selected{background:#0D1B3E!important;color:#C8962E!important;font-weight:700;}
+.cal-day.today{outline:2px solid #C8962E;}
+.cal-err-dot{width:6px;height:6px;border-radius:50%;background:#8B1A1A;}
+.cal-day.selected .cal-err-dot{background:#C8962E;}
+.xl-table{width:100%;border-collapse:collapse;font-size:12px;min-width:700px;}
+.xl-table th{background:#0D1B3E;color:#C8962E;padding:9px 8px;text-align:right;font-weight:600;white-space:nowrap;position:sticky;top:0;}
+.xl-table th:first-child{width:40px;text-align:center;}
+.xl-table td{padding:6px 8px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+.xl-table tr:hover td{background:#FFFBF0;}
+.xl-table tr:nth-child(even) td{background:#FAFAFA;}
+.xl-table tr:nth-child(even):hover td{background:#FFFBF0;}
+.xl-cell{border:none;background:transparent;font-size:12px;font-family:inherit;width:100%;padding:2px 4px;border-radius:4px;direction:rtl;}
+.xl-cell:focus{outline:2px solid #C8962E;background:#FFF3DC;}
+.xl-cell-select{border:none;background:transparent;font-size:12px;font-family:inherit;width:100%;padding:2px 4px;border-radius:4px;direction:rtl;cursor:pointer;}
+.xl-cell-select:focus{outline:2px solid #C8962E;background:#FFF3DC;}
+.row-num{font-size:11px;color:#aaa;text-align:center;font-weight:700;min-width:30px;}
+.xl-save-btn{background:#1A6B3C;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit;}
+.xl-del-btn{background:#FFF0F0;color:#8B1A1A;border:1px solid #F0C0C0;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;}
+.err-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;white-space:nowrap;}
+.err-zone{background:#E6F1FB;color:#185FA5;}
+.err-item{background:#FFF3DC;color:#8B6310;}
+.err-c{background:#FFF0F0;color:#8B1A1A;}
+.err-other{background:#F0F0FF;color:#4A4A8B;}
+.err-delivery{background:#E8F5EE;color:#1A6B3C;}
+@media(max-width:700px){
+  .main-grid{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .summary-grid{grid-template-columns:repeat(2,1fr);}
+  .top3-grid{grid-template-columns:repeat(3,1fr);}
+  .filter-bar{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div class="loading-overlay" id="loading"><div class="loading-spinner"></div></div>
+<div class="notif" id="notif"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div style="font-size:36px;margin-bottom:8px;">🍽️</div>
+      <div class="brand">بصرة ديلايت</div>
+      <div class="sub">قسم التدريب وتقويم الأداء</div>
+    </div>
+    <div class="login-field"><label>اسم المستخدم</label><input type="text" id="login-username" placeholder="اسم المستخدم" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-field"><label>كلمة المرور</label><input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">دخول</button>
+    <div class="login-err" id="login-err"></div>
+    <div style="text-align:center;margin-top:18px;font-size:10px;color:#bbb;">تصميم وتطوير: محمد جلال</div>
+  </div>
+</div>
+
+<!-- EMPLOYEE VIEW -->
+<div id="emp-view" style="display:none;">
+  <div class="topbar">
+    <div><div class="topbar-brand">🍽️ بصرة ديلايت</div><div class="topbar-sub">نتائجي</div></div>
+    <div class="topbar-right"><span class="user-badge" id="emp-user-badge">—</span><button class="btn-logout" onclick="doLogout()">خروج</button></div>
+  </div>
+  <div class="emp-header">
+    <div class="emp-avatar-big" id="emp-avatar-big">—</div>
+    <div class="emp-header-name" id="emp-header-name">—</div>
+    <div class="emp-header-meta" id="emp-header-meta">—</div>
+  </div>
+  <div class="emp-container">
+    <div id="emp-final-score-area"></div>
+    <div class="card">
+      <div class="card-title">ملخص الشهر الحالي</div>
+      <div class="metric-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="metric"><div class="metric-label">درجة المكالمات</div><div class="metric-val" id="em-calls">—</div></div>
+        <div class="metric"><div class="metric-label">درجة الترويج</div><div class="metric-val" id="em-promotion">—</div></div>
+        <div class="metric"><div class="metric-label">درجة الأخطاء</div><div class="metric-val" id="em-errors">—</div></div>
+        <div class="metric"><div class="metric-label">درجة الكوز</div><div class="metric-val" id="em-quiz">—</div></div>
+        <div class="metric"><div class="metric-label">عدد الجلسات</div><div class="metric-val" id="em-sessions">—</div></div>
+      </div>
+      <canvas id="emp-chart" height="110"></canvas>
+    </div>
+    <div class="card"><div class="card-title">سجل الجلسات</div><div id="emp-sessions-list"><div class="empty">لا توجد جلسات بعد</div></div></div>
+    <div class="card"><div class="card-title">⚠️ أخطائي هذا الشهر</div><div id="emp-errors-list"><div class="empty">لا توجد أخطاء هذا الشهر ✅</div></div></div>
+    <div class="card"><div class="card-title">🏆 مكالمات مثالية — 100/100</div><div style="font-size:11px;color:#888;margin-bottom:10px;">مكالمات حققت تقييم كامل من كل الفريق — تعلّم منها</div><div id="emp-perfect-calls"><div class="empty">جاري التحميل...</div></div></div>
+  </div>
+</div>
+
+<!-- CANCELLATIONS VIEW (ADMIN) -->
+<div id="cancel-view" style="display:none;">
+  <div class="topbar">
+    <div><div class="topbar-brand">🍽️ بصرة ديلايت</div><div class="topbar-sub">قسم الإلغاءات</div></div>
+    <div class="topbar-right"><button class="topbar-btn" onclick="showCancelReport()">📊 تقرير الأخطاء</button><button class="btn-logout" onclick="doLogout()">خروج</button></div>
+  </div>
+  <div class="container" style="max-width:800px;">
+    <div class="card">
+      <div class="card-title">تسجيل خطأ جديد</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><label>التاريخ</label><input type="date" id="err-date"></div>
+        <div><label>اسم الموظف</label><select id="err-emp"><option value="">اختر موظف...</option></select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><label>رقم الزبون</label><input type="tel" id="err-phone" placeholder="07xxxxxxxx"></div>
+        <div><label>رقم الأوردر</label><input type="text" id="err-order" placeholder="رقم الأوردر"></div>
+      </div>
+      <label>نوع الخطأ</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <button class="error-type-btn zone" onclick="selectErrType(this,'خطأ الزون',4)">🔴 خطأ الزون — 4 درجات</button>
+        <button class="error-type-btn item" onclick="selectErrType(this,'آيتم غير متوفر',3)">🟡 آيتم غير متوفر — 3 درجات</button>
+        <button class="error-type-btn c" onclick="selectErrType(this,'خطأ C',5)">⛔ خطأ C — 5 درجات</button>
+        <button class="error-type-btn other" onclick="selectErrType(this,'خطأ بالطلب',4)">🔵 خطأ بالطلب — 4 درجات</button>
+        <button class="error-type-btn delivery" onclick="selectErrType(this,'كلفة التوصيل',1)" style="grid-column:span 2;">🟢 كلفة التوصيل — درجة واحدة</button>
+      </div>
+      <div id="other-err-area" style="display:none;background:#F4F5F7;border-radius:8px;padding:10px;margin-bottom:8px;">
+        <label style="font-weight:700;color:#4A4A8B;">✏️ اكتب نوع الخطأ يدوياً</label>
+        <input type="text" id="err-custom-type" placeholder="مثال: خطأ في العنوان..." style="margin-top:4px;margin-bottom:0;">
+      </div>
+      <label>نوع الإلغاء</label>
+      <select id="err-cancel-type">
+        <option value="">— اختر نوع الإلغاء —</option>
+        <option>إلغاء أوردر Zaad</option>
+        <option>التأخير بوصول الطلب (الفرع)</option>
+        <option>إلغاء بسبب خطأ الموظف (زون)</option>
+        <option>حسب طلب الزبون</option>
+        <option>خطأ بالطلب (الفرع)</option>
+        <option>خطأ بالطلب (الموظف)</option>
+        <option>عدم الرد أو الهاتف مغلق</option>
+      </select>
+      <button class="btn btn-gold" onclick="saveError()" style="margin-top:4px;">💾 حفظ الخطأ</button>
+    </div>
+    <!-- TODAY'S ERRORS ONLY -->
+    <div class="card">
+      <div class="card-title">أخطاء اليوم</div>
+      <div id="today-errors-list"><div class="empty">جاري التحميل...</div></div>
+    </div>
+    <!-- CALENDAR VIEW -->
+    <div class="card">
+      <div class="card-title">📅 سجل الأخطاء — التقويم</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <button onclick="calPrevMonth()" style="background:#0D1B3E;color:#C8962E;border:none;border-radius:8px;padding:8px 16px;font-size:16px;cursor:pointer;">→</button>
+        <span id="cal-month-label" style="font-size:16px;font-weight:700;color:#0D1B3E;"></span>
+        <button onclick="calNextMonth()" id="cal-next-btn" style="background:#0D1B3E;color:#C8962E;border:none;border-radius:8px;padding:8px 16px;font-size:16px;cursor:pointer;">←</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <select id="f-emp" style="margin:0;flex:1;font-size:12px;padding:6px 10px;"><option value="">كل الموظفين</option></select>
+        <select id="f-type" style="margin:0;flex:1;font-size:12px;padding:6px 10px;">
+          <option value="">كل الأنواع</option>
+          <option>خطأ الزون</option>
+          <option>آيتم غير متوفر</option>
+          <option>خطأ C</option>
+          <option>خطأ بالطلب</option>
+          <option>كلفة التوصيل</option>
+        </select>
+        <button onclick="renderCalendar()" class="btn btn-primary" style="width:auto;padding:8px 14px;font-size:12px;">بحث</button>
+      </div>
+      <div id="cal-grid" style="margin-bottom:14px;"></div>
+      <div id="cal-day-errors"></div>
+      <input type="hidden" id="f-from">
+      <input type="hidden" id="f-to">
+      <div id="errors-list" style="display:none;"></div>
+    </div>
+  </div>
+</div> (موظف قسم الإلغاءات) -->
+<div id="cancel-staff-view" style="display:none;">
+  <div class="topbar">
+    <div><div class="topbar-brand">🍽️ بصرة ديلايت</div><div class="topbar-sub">تسجيل الأخطاء</div></div>
+    <div class="topbar-right"><button class="btn-logout" onclick="doLogout()">خروج</button></div>
+  </div>
+  <div class="container" style="max-width:800px;">
+    <div class="card">
+      <div class="card-title">تسجيل خطأ جديد</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><label>التاريخ</label><input type="date" id="staff-err-date"></div>
+        <div><label>اسم الموظف</label><select id="staff-err-emp"><option value="">اختر موظف...</option></select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><label>رقم الزبون</label><input type="tel" id="staff-err-phone" placeholder="07xxxxxxxx"></div>
+        <div><label>رقم الأوردر</label><input type="text" id="staff-err-order" placeholder="رقم الأوردر"></div>
+      </div>
+      <label>نوع الخطأ</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <button class="error-type-btn zone" onclick="selectStaffErrType(this,'خطأ الزون',4)">🔴 خطأ الزون — 4 درجات</button>
+        <button class="error-type-btn item" onclick="selectStaffErrType(this,'آيتم غير متوفر',3)">🟡 آيتم غير متوفر — 3 درجات</button>
+        <button class="error-type-btn c" onclick="selectStaffErrType(this,'خطأ C',5)">⛔ خطأ C — 5 درجات</button>
+        <button class="error-type-btn other" onclick="selectStaffErrType(this,'خطأ بالطلب',4)">🔵 خطأ بالطلب — 4 درجات</button>
+        <button class="error-type-btn delivery" onclick="selectStaffErrType(this,'كلفة التوصيل',1)" style="grid-column:span 2;">🟢 كلفة التوصيل — درجة واحدة</button>
+      </div>
+      <div id="staff-other-err-area" style="display:none;background:#F4F5F7;border-radius:8px;padding:10px;margin-bottom:8px;">
+        <label style="font-weight:700;color:#4A4A8B;">✏️ اكتب نوع الخطأ يدوياً</label>
+        <input type="text" id="staff-err-custom-type" placeholder="مثال: خطأ في العنوان..." style="margin-top:4px;margin-bottom:0;">
+      </div>
+      <label>نوع الإلغاء</label>
+      <select id="staff-err-cancel-type">
+        <option value="">— اختر نوع الإلغاء —</option>
+        <option>إلغاء أوردر Zaad</option>
+        <option>التأخير بوصول الطلب (الفرع)</option>
+        <option>إلغاء بسبب خطأ الموظف (زون)</option>
+        <option>حسب طلب الزبون</option>
+        <option>خطأ بالطلب (الفرع)</option>
+        <option>خطأ بالطلب (الموظف)</option>
+        <option>عدم الرد أو الهاتف مغلق</option>
+      </select>
+      <button class="btn btn-gold" onclick="saveStaffError()" style="margin-top:4px;">💾 حفظ الخطأ</button>
+    </div>
+    <div class="card">
+      <div class="card-title">أخطاء اليوم</div>
+      <div id="staff-today-errors"><div class="empty">جاري التحميل...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TRAINER VIEW -->
+<div id="trainer-view" style="display:none;">
+  <div class="topbar">
+    <div><div class="topbar-brand">🍽️ بصرة ديلايت</div><div class="topbar-sub">لوحة المدرب</div></div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="generateMonthlyReport()">📅 التقرير الشهري</button>
+      <button class="topbar-btn" onclick="generateWeeklyReport()">📊 التقرير الأسبوعي</button>
+      <button class="btn-logout" onclick="doLogout()">خروج</button>
+    </div>
+  </div>
+  <div class="container">
+    <div id="top3-area" style="display:none;margin-bottom:20px;">
+      <div style="font-size:14px;font-weight:700;color:#0D1B3E;margin-bottom:10px;display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:4px;height:16px;background:#C8962E;border-radius:2px;"></span>🏆 أفضل 3 موظفين هذا الشهر</div>
+      <div class="top3-grid" id="top3-grid"></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">إجمالي الجلسات</div><div class="stat-value" id="stat-sessions">0</div></div>
+      <div class="stat-card"><div class="stat-label">أعلى أداء</div><div class="stat-value green" id="stat-top" style="font-size:14px;">—</div></div>
+      <div class="stat-card"><div class="stat-label">يحتاج دعم</div><div class="stat-value red" id="stat-low" style="font-size:14px;">—</div></div>
+    </div>
+    <div class="main-grid">
+      <div>
+        <div class="card">
+          <div class="card-title">إضافة موظف</div>
+          <label>الاسم الكامل</label><input type="text" id="new-emp-name" placeholder="اسم الموظف">
+          <label>اسم المستخدم</label><input type="text" id="new-emp-user" placeholder="مثال: ahmed99">
+          <label>كلمة المرور</label><input type="password" id="new-emp-pass" placeholder="••••••">
+          <label>الجنس</label>
+          <select id="new-emp-gender">
+            <option value="male">ذكر 👨</option>
+            <option value="female">أنثى 👩</option>
+          </select>
+          <button class="btn btn-primary" onclick="addEmployee()">+ إضافة موظف</button>
+        </div>
+        <div class="card">
+          <div class="card-title">الموظفون (<span id="emp-count">0</span>)</div>
+          <div id="emp-list"><div class="empty">جاري التحميل...</div></div>
+        </div>
+      </div>
+      <div>
+        <div id="no-selection" class="card" style="text-align:center;padding:3rem;">
+          <div style="font-size:40px;margin-bottom:12px;">👤</div>
+          <p style="color:#888;font-size:14px;">اختر موظفاً من القائمة</p>
+        </div>
+        <div id="emp-panel" style="display:none;">
+          <div class="card" style="padding:14px 16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div id="big-avatar" style="width:46px;height:46px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#185FA5;"></div>
+                <div><div id="big-name" style="font-size:16px;font-weight:700;color:#0D1B3E;"></div><div id="big-meta" style="font-size:11px;color:#888;"></div></div>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                <div id="emp-link-area"></div>
+                <button class="btn btn-sm btn-danger" onclick="deleteEmployee()">حذف</button>
+              </div>
+            </div>
+          </div>
+          <div id="trainer-final-score-area"></div>
+          <div class="card">
+            <div class="card-title">ملخص الأداء</div>
+            <div class="summary-grid" style="grid-template-columns:repeat(5,1fr);">
+              <div class="summary-card"><div class="s-label">المكالمات /100</div><div class="s-val" id="s-calls">—</div></div>
+              <div class="summary-card"><div class="s-label">الترويج /50</div><div class="s-val" id="s-promotion">—</div></div>
+              <div class="summary-card"><div class="s-label">الأخطاء /100</div><div class="s-val" id="s-errors">—</div></div>
+              <div class="summary-card"><div class="s-label">الكوز /50</div><div class="s-val" id="s-quiz">—</div></div>
+              <div class="summary-card"><div class="s-label">الجلسات</div><div class="s-val" id="s-sessions-count">—</div></div>
+            </div>
+            <!-- Quiz score display -->
+            <div style="background:#FFF3DC;border-radius:8px;padding:10px;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <label style="font-weight:700;color:#8B6310;margin:0;">📝 مجموع درجات الكوز (من 50)</label>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="quiz-display" style="font-size:20px;font-weight:700;color:#C8962E;">—</span>
+                  <button onclick="resetQuizScore()" style="background:#fff;border:1px solid #C8962E;color:#C8962E;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit;">تصفير</button>
+                </div>
+              </div>
+              <div style="font-size:11px;color:#8B6310;margin-top:4px;">كل جلسة تضيف من 10 — اضغط "تصفير" في بداية كل شهر</div>
+            </div>
+          </div>
+          <!-- SINGLE TAB: Live Call Evaluation -->
+          <div class="card">
+            <div class="card-title">📞 تقييم المكالمات</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div id="lv-timer" style="font-size:20px;font-weight:700;color:#0D1B3E;min-width:55px;">0:00</div>
+                <button id="lv-timer-btn" onclick="lvToggleTimer()" class="btn btn-primary" style="padding:6px 12px;font-size:12px;width:auto;">▶ ابدأ</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <button onclick="lvPrevCall()" class="btn btn-sm" id="lv-prev-btn" style="opacity:0.3;pointer-events:none;">→ السابقة</button>
+                <span style="font-size:12px;color:#888;">مكالمة</span>
+                <span id="lv-call-num" style="font-size:18px;font-weight:700;color:#C8962E;">1</span>
+                <button onclick="lvNextCall()" class="btn btn-sm">التالية ←</button>
+              </div>
+            </div>
+            <!-- Call info -->
+            <div style="background:#F4F5F7;border-radius:8px;padding:10px;margin-bottom:10px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                <div>
+                  <label style="font-weight:700;color:#185FA5;">📋 معلومات المكالمة</label>
+                  <textarea id="lv-call-info" rows="3" placeholder="07712345678&#10;25/06/2026 - 10:35 AM&#10;مدة: 2:14" style="margin-top:4px;margin-bottom:0;resize:none;font-size:12px;"></textarea>
+                </div>
+                <div>
+                  <label style="font-weight:700;color:#185FA5;">🎙️ رفع تسجيل المكالمة (اختياري)</label>
+                  <div style="margin-top:4px;">
+                    <input type="file" id="lv-recording" accept="audio/*" style="margin:0;width:100%;font-size:12px;padding:6px;" onchange="autoFillPhone(this);previewAudio(this)">
+                    <div id="lv-upload-status" style="font-size:11px;color:#888;margin-top:4px;text-align:center;"></div>
+                    <div id="lv-audio-preview" style="display:none;margin-top:8px;background:#E6F1FB;border-radius:8px;padding:8px;">
+                      <div style="font-size:11px;color:#185FA5;font-weight:700;margin-bottom:4px;">🎧 استمع وقيّم</div>
+                      <audio id="lv-audio-player" controls style="width:100%;height:36px;"></audio>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="lv-criteria-form"><div style="text-align:center;padding:20px;color:#888;font-size:12px;">اختر موظفاً لبدء التقييم</div></div>
+            <div class="total-bar">
+              <div class="total-label">مجموع هذه المكالمة</div>
+              <div><span id="lv-total" style="font-size:26px;font-weight:700;color:#C8962E;">0</span><span style="font-size:13px;color:#FFF3DC;"> / 100</span></div>
+            </div>
+            <div id="lv-auto-notes" style="display:none;background:#FFF0F0;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #F0C0C0;"></div>
+            <!-- Voice notes -->
+            <div style="background:#F4F5F7;border-radius:8px;padding:10px;margin-bottom:10px;">
+              <p style="font-size:11px;font-weight:700;color:#0D1B3E;margin:0 0 8px;">🎙️ ملاحظات صوتية</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                <div>
+                  <p style="font-size:10px;font-weight:700;color:#1A5C8B;margin:0 0 4px;">النبرة الصوتية</p>
+                  <button class="vn-btn pos" data-id="v-n1" data-label="نبرة دافئة عند الترحيب" onclick="vnTag(this)">نبرة دافئة</button>
+                  <button class="vn-btn pos" data-id="v-n2" data-label="خفّض صوته عند الشكوى" onclick="vnTag(this)">خفّض صوته</button>
+                  <button class="vn-btn pos" data-id="v-n3" data-label="ختم بطاقة عالية" onclick="vnTag(this)">ختم بطاقة عالية</button>
+                  <button class="vn-btn neg" data-id="v-n4" data-label="صوت مسطّح" onclick="vnTag(this)">صوت مسطّح</button>
+                  <button class="vn-btn neg" data-id="v-n5" data-label="رفع صوته عند الشكوى" onclick="vnTag(this)">رفع صوته</button>
+                  <button class="vn-btn neg" data-id="v-n6" data-label="إنهاء فاتر وبارد" onclick="vnTag(this)">إنهاء فاتر</button>
+                </div>
+                <div>
+                  <p style="font-size:10px;font-weight:700;color:#1A5C8B;margin:0 0 4px;">التلحين</p>
+                  <button class="vn-btn pos" data-id="v-t1" data-label="نوّع بين رفع وخفض" onclick="vnTag(this)">نوّع رفع وخفض</button>
+                  <button class="vn-btn pos" data-id="v-t2" data-label="وقف قبل المعلومة المهمة" onclick="vnTag(this)">وقف قبل المعلومة</button>
+                  <button class="vn-btn pos" data-id="v-t3" data-label="سرعة مناسبة" onclick="vnTag(this)">سرعة مناسبة</button>
+                  <button class="vn-btn neg" data-id="v-t4" data-label="كلام سريع جداً" onclick="vnTag(this)">كلام سريع</button>
+                  <button class="vn-btn neg" data-id="v-t5" data-label="صمت طويل" onclick="vnTag(this)">صمت طويل</button>
+                  <button class="vn-btn neg" data-id="v-t6" data-label="نبرة صاعدة بالجمل الخبرية" onclick="vnTag(this)">نبرة صاعدة</button>
+                </div>
+                <div>
+                  <p style="font-size:10px;font-weight:700;color:#1A5C8B;margin:0 0 4px;">مخارج الحروف</p>
+                  <button class="vn-btn pos" data-id="v-h1" data-label="حروف واضحة" onclick="vnTag(this)">حروف واضحة</button>
+                  <button class="vn-btn pos" data-id="v-h2" data-label="ض و ق واضحة" onclick="vnTag(this)">ض و ق واضحة</button>
+                  <button class="vn-btn neg" data-id="v-h3" data-label="ض تخرج كـ د" onclick="vnTag(this)">ض كـ د</button>
+                  <button class="vn-btn neg" data-id="v-h4" data-label="ق تخرج كـ گ" onclick="vnTag(this)">ق كـ گ</button>
+                  <button class="vn-btn neg" data-id="v-h5" data-label="ث تخرج كـ س" onclick="vnTag(this)">ث كـ س</button>
+                  <button class="vn-btn neg" data-id="v-h6" data-label="ابتلاع آخر الكلمة" onclick="vnTag(this)">ابتلاع الكلمة</button>
+                </div>
+              </div>
+              <div id="vn-tags" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;min-height:20px;"></div>
+            </div>
+            <div id="lv-calls-summary" style="margin-bottom:10px;"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
+              <div><label>تاريخ الجلسة</label><input type="date" id="lv-date" style="width:100%;"></div>
+              <div><label>درجة الترويج (من 50)</label><input type="number" id="lv-promotion" placeholder="مثال: 40" min="0" max="50" style="width:100%;"></div>
+              <div><label>درجة الكوز (من 10)</label><input type="number" id="lv-quiz" placeholder="مثال: 8" min="0" max="10" style="width:100%;"></div>
+            </div>
+            <div><label>ملاحظة إضافية</label><input type="text" id="lv-note" placeholder="أي ملاحظة..."></div>
+            <button class="btn btn-gold" onclick="lvSaveAll()" style="margin-top:8px;width:100%;font-size:13px;padding:10px;">💾 حفظ جلسة التقييم كاملة</button>
+          </div>
+          <div class="card" id="history-card" style="display:none;">
+            <div class="card-title">سجل الجلسات</div>
+            <!-- Month navigation -->
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#F4F5F7;border-radius:8px;padding:8px 12px;margin-bottom:12px;">
+              <button onclick="changeHistoryMonth(-1)" style="background:#0D1B3E;color:#C8962E;border:none;border-radius:6px;padding:5px 12px;font-size:14px;cursor:pointer;">→</button>
+              <span id="history-month-label" style="font-size:13px;font-weight:700;color:#0D1B3E;"></span>
+              <button onclick="changeHistoryMonth(1)" style="background:#0D1B3E;color:#C8962E;border:none;border-radius:6px;padding:5px 12px;font-size:14px;cursor:pointer;">←</button>
+            </div>
+            <div id="history-list"></div>
+          </div>
+        </div>
+        <div class="card" id="all-card">
+          <div class="card-title">نظرة عامة — الفريق</div>
+          <div id="all-table-wrap"><div class="empty">جاري التحميل...</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:16px 0;font-size:11px;color:#bbb;">تصميم وتطوير: محمد جلال — بصرة ديلايت</div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://nriqtjdtwtqgtzeebblw.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yaXF0amR0d3RxZ3R6ZWViYmx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMjkxMDAsImV4cCI6MjA5NzcwNTEwMH0.71w0HQcUvYmGXr524qz7vFBGwYqaeU_xBMzz5TlAFms';
+const {createClient}=supabase;
+const sb=createClient(SUPA_URL,SUPA_KEY);
+let currentEmp=null,allEmployees=[],allSessions=[],allErrors=[],allCallDetails=[],chartInst=null,historyMonthOffset=0,currentRole='trainer';
+
+function showLoad(){document.getElementById('loading').style.display='flex';}
+function hideLoad(){document.getElementById('loading').style.display='none';}
+function notify(msg){const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),2500);}
+function initials(name){return name.trim().split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
+
+function getSessionsByMonth(empId,offset){
+  const now=new Date();
+  const target=new Date(now.getFullYear(),now.getMonth()+offset,1);
+  const y=target.getFullYear(),m=target.getMonth();
+  return allSessions.filter(s=>{if(s.employee_id!==empId||!s.date)return false;const d=new Date(s.date);return d.getFullYear()===y&&d.getMonth()===m;});
+}
+
+function changeHistoryMonth(dir){
+  historyMonthOffset+=dir;
+  // Don't go into future
+  if(historyMonthOffset>0)historyMonthOffset=0;
+  renderHistory();
+}
+
+function getMonthSessions(empId){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  return allSessions.filter(s=>{if(s.employee_id!==empId||!s.date)return false;const d=new Date(s.date);return d.getFullYear()===y&&d.getMonth()===m;});
+}
+function getMonthErrors(empName){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  return allErrors.filter(e=>{if(e.employee_name!==empName||!e.date)return false;const d=new Date(e.date);return d.getFullYear()===y&&d.getMonth()===m;});
+}
+function calcCallsScore(empId){
+  const ms=getMonthSessions(empId).filter(s=>s.lv_total>0);
+  if(!ms.length)return null;
+  return Math.round(ms.reduce((a,s)=>a+s.lv_total,0)/ms.length*10)/10;
+}
+function calcErrorsScore(empName){
+  const me=getMonthErrors(empName);
+  const total=me.reduce((a,e)=>a+(parseFloat(e.points)||0),0);
+  return Math.max(0,100-total);
+}
+function getQuizScore(empId){
+  const emp=allEmployees.find(e=>e.id===empId);
+  if(!emp||!emp.quiz_score)return null;
+  return emp.quiz_score;
+}
+function calcPromotionScore(empId){
+  // Average of all promotion scores from month sessions (out of 50)
+  const ms=getMonthSessions(empId).filter(s=>s.promotion>0);
+  if(!ms.length)return null;
+  return Math.round(ms.reduce((a,s)=>a+s.promotion,0)/ms.length*10)/10;
+}
+function calcFinalScore(empId,empName){
+  const calls=calcCallsScore(empId);   // out of 100
+  const errors=calcErrorsScore(empName); // out of 100
+  const quiz=getQuizScore(empId);       // out of 50
+  const promotion=calcPromotionScore(empId); // out of 50
+  if(calls===null)return null;
+  // (calls + errors + quiz + promotion) / 3 — total out of 300 ÷ 3 = out of 100
+  let sum=calls+errors;
+  if(quiz!==null)sum+=quiz;
+  if(promotion!==null)sum+=promotion;
+  return Math.round(sum/3*10)/10;
+}
+function scoreColor(s){if(!s)return'#888';if(s>=80)return'#1A6B3C';if(s>=60)return'#C8962E';return'#8B1A1A';}
+function scoreClass(s){if(!s)return'score-none';if(s>=80)return'score-high';if(s>=60)return'score-mid';return'score-low';}
+
+async function doLogin(){
+  const username=document.getElementById('login-username').value.trim();
+  const password=document.getElementById('login-password').value.trim();
+  if(!username||!password){document.getElementById('login-err').textContent='أدخل اسم المستخدم وكلمة المرور';return;}
+  showLoad();document.getElementById('login-err').textContent='';
+  try{
+    const{data:tr}=await sb.from('trainers').select('*').eq('username',username).eq('password',password).single();
+    if(tr){currentRole=tr.role||'trainer';await loadTrainerView();document.getElementById('login-screen').style.display='none';return;}
+  }catch(e){}
+  try{
+    const{data:cs}=await sb.from('cancellations_staff').select('*').eq('username',username).eq('password',password).single();
+    if(cs){
+      if(username==='cancel_staff'){
+        await loadCancelStaffView();
+      } else {
+        await loadCancelView();
+      }
+      document.getElementById('login-screen').style.display='none';hideLoad();return;
+    }
+  }catch(e){}
+  try{
+    const{data:emp}=await sb.from('employees').select('*').eq('username',username).eq('password',password).single();
+    if(emp){await loadEmployeeView(emp);document.getElementById('login-screen').style.display='none';return;}
+  }catch(e){}
+  hideLoad();document.getElementById('login-err').textContent='بيانات الدخول غير صحيحة';
+}
+
+function doLogout(){
+  currentEmp=null;allEmployees=[];allSessions=[];allErrors=[];currentRole='trainer';
+  document.body.classList.remove('viewer-mode');
+  ['trainer-view','emp-view','cancel-view','cancel-staff-view'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-username').value='';
+  document.getElementById('login-password').value='';
+  document.getElementById('login-err').textContent='';
+}
+
+// ── EMPLOYEE VIEW ──
+async function loadEmployeeView(empData){
+  document.getElementById('emp-view').style.display='block';
+  document.getElementById('emp-user-badge').textContent=empData.name;
+  document.getElementById('emp-avatar-big').textContent=initials(empData.name);
+  document.getElementById('emp-header-name').textContent=empData.name;
+  // Apply theme based on gender
+  const isFemale=empData.gender==='female';
+  if(isFemale){
+    document.querySelector('#emp-view .emp-header').style.background='linear-gradient(135deg,#880E4F,#C2185B)';
+    document.querySelector('#emp-view .topbar').style.background='#880E4F';
+    document.querySelector('#emp-view .topbar').style.borderBottomColor='#F48FB1';
+    document.getElementById('emp-avatar-big').style.cssText='width:64px;height:64px;border-radius:50%;background:rgba(244,143,177,0.2);border:3px solid #F48FB1;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#F48FB1;margin:0 auto 10px;';
+  } else {
+    document.querySelector('#emp-view .emp-header').style.background='linear-gradient(135deg,#0D1B3E,#1A2F5A)';
+    document.querySelector('#emp-view .topbar').style.background='#0D1B3E';
+    document.querySelector('#emp-view .topbar').style.borderBottomColor='#C8962E';
+    document.getElementById('emp-avatar-big').style.cssText='width:64px;height:64px;border-radius:50%;background:rgba(200,150,46,0.2);border:3px solid #C8962E;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#C8962E;margin:0 auto 10px;';
+  }
+  const[{data:sess},{data:errs},{data:callDets},{data:perfectCalls},{data:allEmps}]=await Promise.all([
+    sb.from('sessions').select('*').eq('employee_id',empData.id).order('date',{ascending:true}),
+    sb.from('errors').select('*').eq('employee_name',empData.name),
+    sb.from('call_details').select('*').eq('employee_id',empData.id),
+    sb.from('call_details').select('*,sessions(employee_id,date)').eq('total',100).order('created_at',{ascending:false}).limit(20),
+    sb.from('employees').select('id,name')
+  ]);
+  allSessions=sess||[];allErrors=errs||[];allCallDetails=callDets||[];
+  if(allEmps)allEmployees=allEmps;hideLoad();
+  const ms=getMonthSessions(empData.id);
+  document.getElementById('emp-header-meta').textContent=ms.length+' جلسة هذا الشهر';
+  document.getElementById('em-sessions').textContent=ms.length;
+  const calls=calcCallsScore(empData.id),errors=calcErrorsScore(empData.name),quiz=getQuizScore(empData.id),promotion=calcPromotionScore(empData.id),final=calcFinalScore(empData.id,empData.name);
+  const setM=(id,val,score)=>{const el=document.getElementById(id);if(!el)return;el.textContent=val;el.className='metric-val '+(score>=80?'green':score>=60?'orange':score!==null&&score>=0?'red':'');};
+  setM('em-calls',calls!==null?calls+'/100':'—',calls);
+  setM('em-errors',errors+'/100',errors);
+  setM('em-promotion',promotion!==null?promotion+'/50':'—',promotion!==null?promotion*2:null);
+  document.getElementById('em-quiz').textContent=quiz!==null?quiz+'/50':'—';
+  const fa=document.getElementById('emp-final-score-area');
+  if(final!==null){
+    const col=final>=80?'#1A6B3C':final>=60?'#C8962E':'#8B1A1A';
+    const warn=final<60?`<div style="background:#FFF0F0;border-radius:8px;padding:8px;margin-top:8px;font-size:12px;color:#8B1A1A;font-weight:700;">⚠️ درجتك أقل من 60 — يرجى التواصل مع المدرب</div>`:'';
+    const bgGradient=isFemale?'linear-gradient(135deg,#880E4F,#C2185B)':'linear-gradient(135deg,#0D1B3E,#1A2F5A)';
+    fa.innerHTML=`<div style="background:${bgGradient};border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;"><div style="font-size:11px;color:#FFF3DC;margin-bottom:6px;">التقييم الشهري النهائي</div><div style="font-size:48px;font-weight:700;color:${isFemale?'#F48FB1':'#C8962E'};">${final}</div><div style="font-size:11px;color:#FFF3DC;">من 100</div>${warn}</div>`;
+  }
+  // Show all sessions including quiz and call sessions
+  const allMonthSess=allSessions.filter(s=>{
+    if(s.employee_id!==empData.id||!s.date)return false;
+    const now=new Date(),d=new Date(s.date);
+    return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
+  });
+  // Sort sessions by date for numbering
+  const sortedSess=[...allMonthSess].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  document.getElementById('emp-sessions-list').innerHTML=allMonthSess.length?[...allMonthSess].reverse().map(s=>{
+    const sessionNum=sortedSess.findIndex(x=>x.id===s.id)+1;
+    const sessionCalls=allCallDetails.filter(c=>c.session_id===s.id).sort((a,b)=>a.call_num-b.call_num);
+    const callsHtml=sessionCalls.length?sessionCalls.map(c=>{
+      const col=c.total>=80?'#1A6B3C':c.total>=60?'#C8962E':'#8B1A1A';
+      const meta=c.call_info||[c.phone,c.call_date,c.call_time,c.call_dur].filter(Boolean).join(' | ');
+      return `<div style="background:#F4F5F7;border-radius:7px;padding:7px 10px;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:12px;font-weight:700;color:#0D1B3E;">📞 م${c.call_num}</span>
+          <span style="font-size:11px;color:#888;flex:1;">${meta}</span>
+          <span style="font-size:14px;font-weight:700;color:${col};">${c.total}/100</span>
+        </div>
+        ${c.notes?`<div style="font-size:11px;color:#8B1A1A;background:#FFF0F0;border-radius:5px;padding:4px 8px;">⚠️ ${c.notes}</div>`:''}
+        ${c.recording_url?`<audio controls style="width:100%;height:32px;margin-top:4px;" src="${c.recording_url}"></audio>`:''}
+      </div>`;
+    }).join(''):'';
+    return `<div style="border-top:1px solid #f0f0f0;padding:10px 0;">
+      <div style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <div style="text-align:center;min-width:44px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">جلسة</div>
+          <div style="font-size:18px;font-weight:700;color:#0D1B3E;">${sessionNum}</div>
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:3px;">
+            ${s.lv_total?`<span class="badge badge-gold">${s.lv_total}/100</span>`:''}
+            <span class="badge badge-blue">${s.date||''}</span>
+            ${sessionCalls.length?`<span class="badge badge-gray">${sessionCalls.length} مكالمات</span>`:''}
+            ${s.promotion?`<span class="badge badge-green">ترويج: ${s.promotion}/50</span>`:''}
+          </div>
+          ${s.note?`<div style="font-size:11px;color:#888;font-style:italic;">${s.note}</div>`:''}
+        </div>
+        <span style="color:#C8962E;font-size:14px;">▼</span>
+      </div>
+      <div style="display:none;margin-top:8px;">${callsHtml}</div>
+    </div>`;
+  }).join(''):'<div class="empty">لا توجد جلسات هذا الشهر</div>';
+
+  // Render employee errors for current month
+  const now2=new Date();
+  const empErrors=allErrors.filter(e=>{
+    if(e.employee_name!==empData.name||!e.date)return false;
+    const d=new Date(e.date);
+    return d.getFullYear()===now2.getFullYear()&&d.getMonth()===now2.getMonth();
+  }).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const errList=document.getElementById('emp-errors-list');
+  if(!empErrors.length){
+    errList.innerHTML='<div class="empty">لا توجد أخطاء هذا الشهر ✅</div>';
+  } else {
+    const totalPts=empErrors.reduce((a,e)=>a+(parseFloat(e.points)||0),0);
+    errList.innerHTML=`<div style="background:#FFF0F0;border-radius:8px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;"><span style="font-size:12px;color:#8B1A1A;font-weight:700;">${empErrors.length} خطأ هذا الشهر</span><span style="font-size:12px;color:#8B1A1A;font-weight:700;">مجموع الدرجات المخصومة: ${totalPts}</span></div>`+
+    empErrors.map(e=>`<div style="border-top:1px solid #f0f0f0;padding:9px 0;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:#0D1B3E;">${e.error_type} <span style="font-size:11px;color:#888;font-weight:400;">— ${e.date||''}</span></div>
+          <div style="font-size:11px;color:#555;margin-top:2px;">${e.cancellation_type||''}${e.order_number?' | أوردر: '+e.order_number:''}</div>
+        </div>
+        <span style="background:#FFF0F0;color:#8B1A1A;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;">-${e.points} درجة</span>
+      </div>
+    </div>`).join('');
+  }
+
+  // Render perfect calls (100/100) from all employees
+  const perfectEl=document.getElementById('emp-perfect-calls');
+  const perfList=perfectCalls||[];
+  if(!perfList.length){
+    perfectEl.innerHTML='<div class="empty">لا توجد مكالمات مثالية بعد 🎯</div>';
+  } else {
+    const CRIT_LABELS={greeting:'إلقاء التحية',readiness:'الجاهزية والاستعداد',empathy:'التعاطف والأسلوب الودود',speed:'التكلم بسرعة مناسبة',polite:'العبارات المهذبة والأسلوب الرسمي',sequence:'التسلسل المنطقي',listen:'الاستماع بدون مقاطعة',speed_id:'السرعة بتحديد الاحتياج',questions:'فاعلية الأسئلة الموجهة',accuracy:'التركيز مع تزويد معلومات صحيحة',ask_hold:'الاستئذان والانتظار',thank_hold:'شكر الزبون',aht_score:'معدل مدة المكالمة',addon:'السؤال عن الإضافة',delivery:'وقت التوصيل والتكلفة وإعادة الطلب',farewell:'إنهاء المكالمة بشكر'};
+    perfectEl.innerHTML=perfList.map((c,i)=>{
+      const empName=allEmployees.find(e=>e.id===(c.sessions?.employee_id||c.employee_id))?.name||'موظف';
+      const scores=c.scores||{};
+      const scoresHtml=Object.entries(scores).filter(([k,v])=>v>0).map(([k,v])=>`<span style="background:#E8F5EE;color:#1A6B3C;border-radius:12px;padding:2px 8px;font-size:11px;margin:2px;display:inline-block;">✓ ${CRIT_LABELS[k]||k}: ${v}</span>`).join('');
+      const vtHtml=(c.voice_tags||[]).map(t=>`<span style="background:${t.val==='pos'?'#E8F5EE':'#FFF0F0'};color:${t.val==='pos'?'#1A6B3C':'#8B1A1A'};border-radius:12px;padding:2px 8px;font-size:11px;margin:2px;display:inline-block;">${t.val==='pos'?'✓':'✗'} ${t.label}</span>`).join('');
+      return `<div style="border-top:1px solid #f0f0f0;padding:12px 0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer;" onclick="document.getElementById('pc-detail-${i}').style.display=document.getElementById('pc-detail-${i}').style.display==='none'?'block':'none'">
+          <div>
+            <span style="font-size:14px;font-weight:700;color:#0D1B3E;">👤 ${empName}</span>
+            <span style="font-size:11px;color:#888;margin-right:8px;">${c.call_date||''} ${c.call_time||''}</span>
+            ${c.call_dur?`<span style="font-size:11px;color:#888;">⏱️ ${c.call_dur}</span>`:''}
+          </div>
+          <span style="background:#E8F5EE;color:#1A6B3C;border-radius:20px;padding:4px 12px;font-size:14px;font-weight:700;">100/100 🏆</span>
+        </div>
+        <div id="pc-detail-${i}" style="display:none;">
+          ${c.recording_url?`<div style="background:#E6F1FB;border-radius:8px;padding:8px;margin-bottom:8px;"><div style="font-size:11px;color:#185FA5;font-weight:700;margin-bottom:4px;">🎙️ التسجيل الصوتي</div><audio controls style="width:100%;height:36px;" src="${c.recording_url}"></audio></div>`:''}
+          ${scoresHtml?`<div style="margin-bottom:6px;"><div style="font-size:11px;font-weight:700;color:#0D1B3E;margin-bottom:4px;">📊 تفاصيل التقييم:</div><div style="display:flex;flex-wrap:wrap;">${scoresHtml}</div></div>`:''}
+          ${vtHtml?`<div><div style="font-size:11px;font-weight:700;color:#0D1B3E;margin-bottom:4px;">🎙️ ملاحظات صوتية:</div><div style="display:flex;flex-wrap:wrap;">${vtHtml}</div></div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+async function checkAutoDelete(){
+  // Check each employee — if no errors for 7 consecutive days, delete their last error
+  const{data:allErrs}=await sb.from('errors').select('*').order('date',{ascending:false});
+  if(!allErrs||!allErrs.length)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  // Group by employee
+  const byEmp={};
+  allErrs.forEach(e=>{if(!byEmp[e.employee_name])byEmp[e.employee_name]=[];byEmp[e.employee_name].push(e);});
+  const deleted=[];
+  for(const [empName,errs] of Object.entries(byEmp)){
+    // Find most recent error date
+    const lastErrDate=new Date(errs[0].date);lastErrDate.setHours(0,0,0,0);
+    const diffDays=Math.floor((today-lastErrDate)/(1000*60*60*24));
+    if(diffDays>=7){
+      // Delete the last (oldest in sorted desc = last) error
+      const lastErr=errs[errs.length-1];
+      await sb.from('errors').delete().eq('id',lastErr.id);
+      deleted.push({empName,errorType:lastErr.error_type,errorDate:lastErr.date,deletedAt:today.toISOString().split('T')[0]});
+    }
+  }
+  // Save deleted log to localStorage for reports
+  if(deleted.length){
+    const existing=JSON.parse(localStorage.getItem('autoDeletedErrors')||'[]');
+    localStorage.setItem('autoDeletedErrors',JSON.stringify([...existing,...deleted]));
+  }
+  return deleted;
+}
+
+async function loadCancelView(){
+  document.getElementById('cancel-view').style.display='block';
+  await checkAutoDelete();
+  const{data:emps}=await sb.from('employees').select('*').order('name');
+  allEmployees=emps||[];hideLoad();
+  const sel=document.getElementById('err-emp');
+  const fsel=document.getElementById('f-emp');
+  const opts=allEmployees.map(e=>`<option value="${e.name}">${e.name}</option>`).join('');
+  sel.innerHTML='<option value="">اختر موظف...</option>'+opts;
+  if(fsel)fsel.innerHTML='<option value="">كل الموظفين</option>'+opts;
+  document.getElementById('err-date').value=new Date().toISOString().split('T')[0];
+  calOffset=0;calSelectedDate=null;
+  await loadTodayErrors();
+  await renderCalendar();
+}
+
+async function loadTodayErrors(){
+  const today=new Date().toISOString().split('T')[0];
+  const{data}=await sb.from('errors').select('*').eq('date',today).order('created_at',{ascending:false});
+  const list=document.getElementById('today-errors-list');
+  if(!list)return;
+  if(!data||!data.length){
+    list.innerHTML='<div class="empty">✅ لا توجد أخطاء مسجّلة اليوم</div>';
+    return;
+  }
+  list.innerHTML=`<div style="background:#FFF0F0;border-radius:8px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;"><span style="font-size:12px;color:#8B1A1A;font-weight:700;">${data.length} خطأ اليوم</span><span style="font-size:12px;color:#888;">${today}</span></div>`+
+  data.map(e=>`<div style="border-top:1px solid #f0f0f0;padding:9px 0;display:flex;align-items:center;gap:10px;">
+    <div style="flex:1;">
+      <div style="font-weight:700;font-size:13px;color:#0D1B3E;">${e.employee_name}</div>
+      <div style="font-size:11px;color:#555;margin-top:2px;">${e.error_type}${e.cancellation_type?' | '+e.cancellation_type:''}${e.customer_phone?' | '+e.customer_phone:''}${e.order_number?' | أوردر: '+e.order_number:''}</div>
+    </div>
+    <span style="background:#FFF0F0;color:#8B1A1A;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;">${e.points} درجة</span>
+  </div>`).join('');
+}
+
+let calOffset=0,calSelectedDate=null,calAllErrors=[];
+
+function calPrevMonth(){calOffset--;renderCalendar();}
+function calNextMonth(){if(calOffset<0){calOffset++;renderCalendar();}}
+
+async function renderCalendar(){
+  const now=new Date();
+  const target=new Date(now.getFullYear(),now.getMonth()+calOffset,1);
+  const y=target.getFullYear(),m=target.getMonth();
+  const monthLabel=target.toLocaleDateString('ar-IQ',{month:'long',year:'numeric'});
+  const labelEl=document.getElementById('cal-month-label');
+  if(labelEl)labelEl.textContent=monthLabel;
+  const nextBtn=document.getElementById('cal-next-btn');
+  if(nextBtn)nextBtn.style.opacity=calOffset>=0?'0.3':'1';
+
+  // Fetch errors for this month
+  const from=new Date(y,m,1).toISOString().split('T')[0];
+  const to=new Date(y,m+1,0).toISOString().split('T')[0];
+  const emp=document.getElementById('f-emp')?.value||'';
+  const type=document.getElementById('f-type')?.value||'';
+  let query=sb.from('errors').select('*').gte('date',from).lte('date',to).order('date');
+  if(emp)query=query.eq('employee_name',emp);
+  if(type)query=query.ilike('error_type','%'+type+'%');
+  const{data}=await query;
+  calAllErrors=data||[];
+
+  // Build error days map
+  const errDays={};
+  calAllErrors.forEach(e=>{if(e.date)errDays[e.date]=(errDays[e.date]||0)+1;});
+
+  // Build calendar grid
+  const firstDay=new Date(y,m,1).getDay(); // 0=Sun
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const todayStr=new Date().toISOString().split('T')[0];
+  const dayNames=['أح','إث','ثل','أر','خم','جم','سب'];
+
+  let html=`<div class="cal-grid">`;
+  dayNames.forEach(d=>html+=`<div class="cal-day-header">${d}</div>`);
+  // Empty cells before first day
+  for(let i=0;i<firstDay;i++)html+=`<div class="cal-day empty"></div>`;
+  // Days
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasErr=errDays[dateStr]>0;
+    const isToday=dateStr===todayStr;
+    const isSelected=dateStr===calSelectedDate;
+    const cls=['cal-day',hasErr?'has-error':'no-error',isToday?'today':'',isSelected?'selected':''].filter(Boolean).join(' ');
+    html+=`<div class="${cls}" onclick="calSelectDay('${dateStr}')">
+      <span>${d}</span>
+      ${hasErr?`<div class="cal-err-dot"></div>`:''}
+    </div>`;
+  }
+  html+=`</div>`;
+  document.getElementById('cal-grid').innerHTML=html;
+
+  // Show selected day errors or summary
+  if(calSelectedDate){
+    const sd=new Date(calSelectedDate);
+    if(sd.getMonth()===m&&sd.getFullYear()===y){
+      showDayErrors(calSelectedDate);
+    } else {
+      calSelectedDate=null;
+      document.getElementById('cal-day-errors').innerHTML='';
+    }
+  } else {
+    // Show month summary
+    showMonthSummary(calAllErrors,monthLabel);
+  }
+}
+
+function calSelectDay(dateStr){
+  calSelectedDate=calSelectedDate===dateStr?null:dateStr;
+  // Re-render grid to update selected state
+  const cells=document.querySelectorAll('.cal-day');
+  cells.forEach(c=>{
+    c.classList.remove('selected');
+  });
+  if(calSelectedDate){
+    showDayErrors(calSelectedDate);
+  } else {
+    const now=new Date();
+    const target=new Date(now.getFullYear(),now.getMonth()+calOffset,1);
+    const monthLabel=target.toLocaleDateString('ar-IQ',{month:'long',year:'numeric'});
+    showMonthSummary(calAllErrors,monthLabel);
+  }
+  renderCalendar();
+}
+
+function showDayErrors(dateStr){
+  const d=new Date(dateStr);
+  const dayLabel=d.toLocaleDateString('ar-IQ',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const dayErrors=calAllErrors.filter(e=>e.date===dateStr);
+  const area=document.getElementById('cal-day-errors');
+  if(!dayErrors.length){
+    area.innerHTML=`<div style="background:#E8F5EE;border-radius:8px;padding:12px;text-align:center;"><div style="font-size:13px;font-weight:700;color:#1A6B3C;">✅ ${dayLabel}</div><div style="font-size:12px;color:#1A6B3C;margin-top:4px;">لا توجد أخطاء في هذا اليوم</div></div>`;
+    return;
+  }
+  area.innerHTML=`<div style="background:#F4F5F7;border-radius:10px;padding:12px;">
+    <div style="font-size:13px;font-weight:700;color:#0D1B3E;margin-bottom:10px;border-bottom:2px solid #C8962E;padding-bottom:6px;">📆 ${dayLabel} — ${dayErrors.length} خطأ</div>
+    ${dayErrors.map(e=>{
+      const errColor=e.error_type.includes('C')?'#8B1A1A':e.error_type.includes('زون')?'#185FA5':e.error_type.includes('آيتم')?'#8B6310':e.error_type.includes('توصيل')?'#1A6B3C':'#4A4A8B';
+      return `<div style="background:#fff;border-radius:8px;padding:10px;margin-bottom:6px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:#0D1B3E;">${e.employee_name}</div>
+          <div style="font-size:12px;color:${errColor};font-weight:600;margin-top:2px;">${e.error_type}</div>
+          ${e.cancellation_type?`<div style="font-size:11px;color:#888;margin-top:1px;">${e.cancellation_type}</div>`:''}
+          ${e.customer_phone?`<div style="font-size:11px;color:#888;">📞 ${e.customer_phone}</div>`:''}
+          ${e.order_number?`<div style="font-size:11px;color:#888;">أوردر: ${e.order_number}</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span style="background:#FFF0F0;color:#8B1A1A;border-radius:12px;padding:3px 10px;font-size:12px;font-weight:700;white-space:nowrap;">${e.points} درجة</span>
+          <button onclick="deleteErrorRow('${e.id}')" style="background:none;color:#ccc;border:none;font-size:12px;cursor:pointer;">✕</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function showMonthSummary(errors,monthLabel){
+  const area=document.getElementById('cal-day-errors');
+  if(!errors.length){
+    area.innerHTML=`<div style="text-align:center;padding:16px;color:#1A6B3C;font-size:13px;font-weight:700;">✅ لا توجد أخطاء في ${monthLabel}</div>`;
+    return;
+  }
+  const total=errors.reduce((a,e)=>a+(parseFloat(e.points)||0),0);
+  area.innerHTML=`<div style="background:#FFF0F0;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-size:13px;color:#8B1A1A;font-weight:700;">إجمالي ${errors.length} خطأ في ${monthLabel}</span>
+    <span style="font-size:13px;color:#8B1A1A;font-weight:700;">${total} درجة مخصومة</span>
+  </div>
+  <div style="font-size:11px;color:#888;text-align:center;margin-top:8px;">اضغط على يوم لرؤية تفاصيل أخطائه</div>`;
+}
+let selectedStaffErrType='',selectedStaffErrPoints=0,isStaffOtherErr=false;
+
+function selectStaffErrType(btn,type,pts){
+  document.querySelectorAll('#cancel-staff-view .error-type-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  isStaffOtherErr=(type==='خطأ بالطلب');
+  document.getElementById('staff-other-err-area').style.display=isStaffOtherErr?'block':'none';
+  selectedStaffErrType=type;selectedStaffErrPoints=pts;
+}
+
+async function saveStaffError(){
+  const date=document.getElementById('staff-err-date').value;
+  const emp=document.getElementById('staff-err-emp').value;
+  if(!date||!emp||!selectedStaffErrType){notify('أكمل جميع الحقول واختر نوع الخطأ');return;}
+  let errType=selectedStaffErrType;
+  if(isStaffOtherErr){const custom=document.getElementById('staff-err-custom-type').value.trim();if(custom)errType=custom;}
+  const err={date,employee_name:emp,customer_phone:document.getElementById('staff-err-phone').value.trim(),order_number:document.getElementById('staff-err-order').value.trim(),error_type:errType,cancellation_type:document.getElementById('staff-err-cancel-type').value,points:selectedStaffErrPoints};
+  showLoad();
+  const{error}=await sb.from('errors').insert([err]);
+  hideLoad();
+  if(error){notify('خطأ: '+error.message);return;}
+  document.getElementById('staff-err-phone').value='';
+  document.getElementById('staff-err-order').value='';
+  document.getElementById('staff-err-cancel-type').value='';
+  document.getElementById('staff-err-custom-type').value='';
+  document.querySelectorAll('#cancel-staff-view .error-type-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('staff-other-err-area').style.display='none';
+  selectedStaffErrType='';selectedStaffErrPoints=0;isStaffOtherErr=false;
+  notify('✓ تم حفظ الخطأ');
+  await loadStaffTodayErrors();
+}
+
+async function loadCancelStaffView(){
+  document.getElementById('cancel-staff-view').style.display='block';
+  const{data:emps}=await sb.from('employees').select('*').order('name');
+  allEmployees=emps||[];hideLoad();
+  const sel=document.getElementById('staff-err-emp');
+  sel.innerHTML='<option value="">اختر موظف...</option>'+allEmployees.map(e=>`<option value="${e.name}">${e.name}</option>`).join('');
+  document.getElementById('staff-err-date').value=new Date().toISOString().split('T')[0];
+  await loadStaffTodayErrors();
+}
+
+async function loadStaffTodayErrors(){
+  const today=new Date().toISOString().split('T')[0];
+  const{data}=await sb.from('errors').select('*').eq('date',today).order('created_at',{ascending:false});
+  const list=document.getElementById('staff-today-errors');
+  if(!list)return;
+  if(!data||!data.length){list.innerHTML='<div class="empty">✅ لا توجد أخطاء مسجّلة اليوم</div>';return;}
+  list.innerHTML=data.map(e=>`<div style="border-top:1px solid #f0f0f0;padding:9px 0;display:flex;align-items:center;gap:10px;">
+    <div style="flex:1;">
+      <div style="font-weight:700;font-size:13px;color:#0D1B3E;">${e.employee_name}</div>
+      <div style="font-size:11px;color:#555;margin-top:2px;">${e.error_type}${e.cancellation_type?' | '+e.cancellation_type:''}${e.customer_phone?' | '+e.customer_phone:''}${e.order_number?' | أوردر: '+e.order_number:''}</div>
+    </div>
+    <span style="background:#FFF0F0;color:#8B1A1A;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;">${e.points} درجة</span>
+  </div>`).join('');
+}
+
+function selectErrType(btn,type,pts){
+  document.querySelectorAll('.error-type-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  isOtherErr=(type==='خطأ بالطلب');
+  document.getElementById('other-err-area').style.display=isOtherErr?'block':'none';
+  selectedErrType=type;selectedErrPoints=pts;
+}
+
+async function saveError(){
+  const date=document.getElementById('err-date').value;
+  const emp=document.getElementById('err-emp').value;
+  if(!date||!emp||!selectedErrType){notify('أكمل جميع الحقول واختر نوع الخطأ');return;}
+  let errType=selectedErrType;
+  if(isOtherErr){
+    const custom=document.getElementById('err-custom-type').value.trim();
+    if(custom)errType=custom;
+  }
+  const err={date,employee_name:emp,customer_phone:document.getElementById('err-phone').value.trim(),order_number:document.getElementById('err-order').value.trim(),error_type:errType,cancellation_type:document.getElementById('err-cancel-type').value,points:selectedErrPoints};
+  showLoad();
+  const{error}=await sb.from('errors').insert([err]);
+  hideLoad();
+  if(error){notify('خطأ: '+error.message);return;}
+  document.getElementById('err-phone').value='';
+  document.getElementById('err-order').value='';
+  document.getElementById('err-cancel-type').value='';
+  document.getElementById('err-custom-type').value='';
+  document.querySelectorAll('.error-type-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('other-err-area').style.display='none';
+  selectedErrType='';selectedErrPoints=0;isOtherErr=false;
+  notify('✓ تم حفظ الخطأ');
+  await loadTodayErrors();
+}
+
+async function filterErrors(){
+  const from=document.getElementById('f-from')?.value||'';
+  const to=document.getElementById('f-to')?.value||'';
+  const emp=document.getElementById('f-emp')?.value||'';
+  const type=document.getElementById('f-type')?.value||'';
+  let query=sb.from('errors').select('*').order('date',{ascending:false}).order('created_at',{ascending:false});
+  if(from)query=query.gte('date',from);
+  if(to)query=query.lte('date',to);
+  if(emp)query=query.eq('employee_name',emp);
+  if(type)query=query.ilike('error_type','%'+type+'%');
+  const{data}=await query;
+  renderErrorsList(data||[]);
+}
+async function clearFilter(){
+  const now=new Date();
+  document.getElementById('f-from').value=new Date(now.getFullYear(),now.getMonth(),1).toISOString().split('T')[0];
+  document.getElementById('f-to').value=new Date().toISOString().split('T')[0];
+  document.getElementById('f-emp').value='';
+  document.getElementById('f-type').value='';
+  await filterErrors();
+}
+
+function getErrBadgeClass(type){
+  if(!type)return'err-other';
+  if(type.includes('زون'))return'err-zone';
+  if(type.includes('آيتم'))return'err-item';
+  if(type.includes('C')||type.includes('c'))return'err-c';
+  if(type.includes('توصيل'))return'err-delivery';
+  return'err-other';
+}
+
+function renderErrorsList(data){
+  const list=document.getElementById('errors-list');
+  if(!data.length){list.innerHTML='<div class="empty">لا توجد أخطاء في هذه الفترة</div>';return;}
+
+  // Group by month then by date
+  const byMonth={};
+  data.forEach(e=>{
+    if(!e.date)return;
+    const d=new Date(e.date);
+    const monthKey=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const monthLabel=d.toLocaleDateString('ar-IQ',{month:'long',year:'numeric'});
+    const dayKey=e.date;
+    const dayLabel=d.toLocaleDateString('ar-IQ',{day:'numeric',month:'long'});
+    if(!byMonth[monthKey])byMonth[monthKey]={label:monthLabel,days:{},count:0};
+    if(!byMonth[monthKey].days[dayKey])byMonth[monthKey].days[dayKey]={label:dayLabel,errors:[]};
+    byMonth[monthKey].days[dayKey].errors.push(e);
+    byMonth[monthKey].count++;
+  });
+
+  let html='';
+
+  Object.keys(byMonth).sort((a,b)=>b.localeCompare(a)).forEach(mKey=>{
+    const month=byMonth[mKey];
+    html+=`<div style="margin-bottom:20px;">
+      <div style="background:#0D1B3E;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleMonthGroup('mg-${mKey}','ma-${mKey}')">
+        <span style="font-size:14px;font-weight:700;color:#C8962E;">📅 ${month.label}</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:#FFF3DC;">${month.count} خطأ</span>
+          <span id="ma-${mKey}" style="color:#C8962E;font-size:14px;">▼</span>
+        </div>
+      </div>
+      <div id="mg-${mKey}" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;">`;
+
+    Object.keys(month.days).sort((a,b)=>b.localeCompare(a)).forEach(dKey=>{
+      const day=month.days[dKey];
+      html+=`<div style="background:#F4F5F7;border-radius:10px;padding:10px;min-width:220px;flex:1;">
+        <div style="font-size:12px;font-weight:700;color:#0D1B3E;border-bottom:2px solid #C8962E;padding-bottom:6px;margin-bottom:8px;">📆 ${day.label}</div>`;
+
+      day.errors.forEach(e=>{
+        const errColor=e.error_type.includes('C')?'#8B1A1A':e.error_type.includes('زون')?'#185FA5':e.error_type.includes('آيتم')?'#8B6310':e.error_type.includes('توصيل')?'#1A6B3C':'#4A4A8B';
+        html+=`<div style="background:#fff;border-radius:8px;padding:8px;margin-bottom:6px;display:flex;align-items:flex-start;justify-content:space-between;gap:6px;">
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;color:#0D1B3E;">${e.employee_name}</div>
+            <div style="font-size:11px;color:${errColor};font-weight:600;margin-top:2px;">${e.error_type}</div>
+            ${e.cancellation_type?`<div style="font-size:10px;color:#888;margin-top:1px;">${e.cancellation_type}</div>`:''}
+            ${e.order_number?`<div style="font-size:10px;color:#888;">أوردر: ${e.order_number}</div>`:''}
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <span style="background:#FFF0F0;color:#8B1A1A;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap;">${e.points} درجة</span>
+            <button onclick="deleteErrorRow('${e.id}')" style="background:none;color:#ccc;border:none;font-size:12px;cursor:pointer;padding:0;">✕</button>
+          </div>
+        </div>`;
+      });
+
+      html+=`</div>`;
+    });
+
+    html+=`</div></div>`;
+  });
+
+  list.innerHTML=html;
+}
+
+function toggleMonthGroup(groupId,arrowId){
+  const group=document.getElementById(groupId);
+  const arrow=document.getElementById(arrowId);
+  if(!group)return;
+  const isOpen=group.style.display!=='none';
+  group.style.display=isOpen?'none':'block';
+  if(arrow)arrow.textContent=isOpen?'▶':'▼';
+}
+
+async function deleteErrorRow(id){
+  if(!confirm('حذف هذا الخطأ؟'))return;
+  showLoad();
+  await sb.from('errors').delete().eq('id',id);
+  allErrors=allErrors.filter(e=>e.id!==id);
+  hideLoad();
+  notify('تم الحذف');
+  await renderCalendar();
+}
+
+function showCancelReport(){
+  const from=document.getElementById('f-from').value;
+  const to=document.getElementById('f-to').value;
+  let query=sb.from('errors').select('*');
+  if(from)query=query.gte('date',from);
+  if(to)query=query.lte('date',to);
+  query.order('employee_name').then(({data})=>{
+    if(!data||!data.length){alert('لا توجد أخطاء في هذه الفترة');return;}
+    const byEmp={};
+    data.forEach(e=>{if(!byEmp[e.employee_name])byEmp[e.employee_name]={total:0,count:0,errors:[]};byEmp[e.employee_name].total+=parseFloat(e.points)||0;byEmp[e.employee_name].count++;byEmp[e.employee_name].errors.push(e);});
+    const rows=Object.entries(byEmp).sort((a,b)=>b[1].total-a[1].total).map(([name,info])=>{
+      const score=Math.max(0,100-info.total);
+      const col=score>=80?'#1A6B3C':score>=60?'#C8962E':'#8B1A1A';
+      return `<tr><td style="font-weight:700;">${name}</td><td style="text-align:center;">${info.count}</td><td style="text-align:center;color:#8B1A1A;font-weight:700;">${info.total}</td><td style="text-align:center;font-weight:700;color:${col};">${score}/100</td></tr>`;
+    }).join('');
+    const win=window.open('','_blank');
+    win.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>تقرير الأخطاء</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#F4F5F7;direction:rtl;padding:20px;}h1{color:#0D1B3E;border-bottom:3px solid #C8962E;padding-bottom:8px;margin-bottom:20px;font-size:18px;}table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}th{background:#0D1B3E;color:#C8962E;padding:10px;text-align:right;}td{padding:10px;border-bottom:1px solid #f0f0f0;}@media print{button{display:none;}}</style></head><body><h1>🍽️ تقرير أخطاء الموظفين — ${from||''} إلى ${to||''}</h1><table><tr><th>الموظف</th><th style="text-align:center;">عدد الأخطاء</th><th style="text-align:center;">مجموع الدرجات المخصومة</th><th style="text-align:center;">درجة الأخطاء</th></tr>${rows}</table><br><button onclick="window.print()" style="background:#0D1B3E;color:#C8962E;border:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">🖨️ طباعة</button></body></html>`);
+    win.document.close();
+  });
+}
+
+// ── TRAINER VIEW ──
+async function loadTrainerView(){
+  document.getElementById('trainer-view').style.display='block';
+  const[{data:emps},{data:sess},{data:errs},{data:callDets}]=await Promise.all([
+    sb.from('employees').select('*').order('name'),
+    sb.from('sessions').select('*').order('date'),
+    sb.from('errors').select('*'),
+    sb.from('call_details').select('*')
+  ]);
+  allEmployees=emps||[];allSessions=sess||[];allErrors=errs||[];allCallDetails=callDets||[];
+  hideLoad();renderSidebar();renderAllTable();updateStats();renderTop3();
+  applyViewerRestrictions();
+}
+
+function applyViewerRestrictions(){
+  if(currentRole!=='viewer')return;
+  // Hide add employee card
+  document.querySelectorAll('.card').forEach(card=>{
+    const title=card.querySelector('.card-title');
+    if(title&&title.textContent.trim()==='إضافة موظف')card.style.display='none';
+  });
+  // Add viewer badge to topbar
+  const topbar=document.querySelector('#trainer-view .topbar-sub');
+  if(topbar)topbar.textContent='لوحة المراقبة (عرض فقط)';
+  // Hide buttons after render - use a mutation-safe approach via CSS class
+  document.body.classList.add('viewer-mode');
+}
+
+function renderTop3(){
+  const scores=allEmployees.map(emp=>({name:emp.name,score:calcFinalScore(emp.id,emp.name)})).filter(x=>x.score!==null).sort((a,b)=>b.score-a.score).slice(0,3);
+  if(!scores.length){document.getElementById('top3-area').style.display='none';return;}
+  document.getElementById('top3-area').style.display='block';
+  const medals=['🥇','🥈','🥉'],classes=['gold','silver','bronze'];
+  document.getElementById('top3-grid').innerHTML=scores.map((s,i)=>`<div class="top3-card ${classes[i]}"><div class="top3-rank">${medals[i]}</div><div class="top3-name">${s.name}</div><div class="top3-score">${s.score}</div></div>`).join('');
+}
+
+function renderSidebar(){
+  document.getElementById('emp-count').textContent=allEmployees.length;
+  const list=document.getElementById('emp-list');
+  if(!allEmployees.length){list.innerHTML='<div class="empty">لم يُضف أي موظف بعد</div>';return;}
+  list.innerHTML=allEmployees.map(emp=>{
+    const f=calcFinalScore(emp.id,emp.name);
+    const active=currentEmp&&currentEmp.id===emp.id?'active':'';
+    return `<div class="emp-item ${active}" onclick="selectEmployee('${emp.id}')"><div class="emp-avatar">${initials(emp.name)}</div><div class="emp-info"><div class="emp-name">${emp.name}</div><div class="emp-meta">${getMonthSessions(emp.id).length} جلسة</div></div><div class="emp-score">${f!==null?f:'—'}</div></div>`;
+  }).join('');
+}
+
+function selectEmployee(empId){
+  currentEmp=allEmployees.find(e=>e.id===empId);if(!currentEmp)return;
+  historyMonthOffset=0;
+  lvScores={};lvAutoNotes=[];lvCalls=[];lvCurrentCall=1;lvVoiceTags=[];
+  // Initialize scores to full before building form
+  CRITERIA.forEach(axis=>{axis.items.forEach(item=>{lvScores[item.id]=item.pts;});});
+  document.getElementById('no-selection').style.display='none';
+  document.getElementById('emp-panel').style.display='block';
+  document.getElementById('all-card').style.display='none';
+  document.getElementById('big-avatar').textContent=initials(currentEmp.name);
+  document.getElementById('big-name').textContent=currentEmp.name;
+  document.getElementById('lv-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('emp-link-area').innerHTML=`<div class="creds-card"><div class="creds-row"><span class="creds-label">👤</span><span class="creds-val">${currentEmp.username}</span></div><div class="creds-row" style="margin:0;"><span class="creds-label">🔑</span><span class="creds-val">${currentEmp.password}</span></div></div>`;
+  renderSidebar();renderSummary();renderHistory();renderChart();renderTrainerFinalScore();
+  buildCriteriaForm();
+}
+
+function renderTrainerFinalScore(){
+  const f=calcFinalScore(currentEmp.id,currentEmp.name);
+  const area=document.getElementById('trainer-final-score-area');
+  if(f===null){area.innerHTML='';return;}
+  const col=f>=80?'#1A6B3C':f>=60?'#C8962E':'#8B1A1A';
+  const warn=f<60?`<div style="background:#FFF0F0;border-radius:8px;padding:8px;margin-top:8px;font-size:12px;color:#8B1A1A;font-weight:700;">⚠️ درجة أقل من 60 — يحتاج تنبيه</div>`:'';
+  area.innerHTML=`<div style="background:linear-gradient(135deg,#0D1B3E,#1A2F5A);border-radius:12px;padding:14px;text-align:center;margin-bottom:14px;"><div style="font-size:11px;color:#FFF3DC;margin-bottom:4px;">التقييم الشهري النهائي</div><div style="font-size:40px;font-weight:700;color:${col};">${f}</div><div style="font-size:11px;color:#FFF3DC;">من 100</div>${warn}</div>`;
+}
+
+function renderSummary(){
+  const ms=getMonthSessions(currentEmp.id);
+  document.getElementById('big-meta').textContent=ms.length+' جلسة هذا الشهر';
+  document.getElementById('s-sessions-count').textContent=ms.length;
+  const calls=calcCallsScore(currentEmp.id),errors=calcErrorsScore(currentEmp.name),quiz=getQuizScore(currentEmp.id),promotion=calcPromotionScore(currentEmp.id);
+  document.getElementById('s-calls').textContent=calls!==null?calls:'—';
+  document.getElementById('s-errors').textContent=errors;
+  document.getElementById('s-quiz').textContent=quiz!==null?quiz:'—';
+  document.getElementById('s-promotion').textContent=promotion!==null?promotion:'—';
+  const qd=document.getElementById('quiz-display');
+  if(qd)qd.textContent=quiz!==null?quiz+'/50':'—';
+}
+
+function toggleSession(id){
+  const detail=document.getElementById('detail-'+id);
+  const arrow=document.getElementById('arrow-'+id);
+  if(!detail)return;
+  const isOpen=detail.style.display!=='none';
+  detail.style.display=isOpen?'none':'block';
+  if(arrow)arrow.textContent=isOpen?'▼':'▲';
+}
+
+async function deleteCall(callId,sessionId){
+  if(!confirm('حذف هذه المكالمة؟'))return;
+  showLoad();
+  await sb.from('call_details').delete().eq('id',callId);
+  allCallDetails=allCallDetails.filter(c=>c.id!==callId);
+  // Recalculate session lv_total
+  const remaining=allCallDetails.filter(c=>c.session_id===sessionId);
+  const newAvg=remaining.length?Math.round(remaining.reduce((a,c)=>a+c.total,0)/remaining.length*10)/10:0;
+  await sb.from('sessions').update({lv_total:newAvg,duration:remaining.length+' مكالمات'}).eq('id',sessionId);
+  const si=allSessions.findIndex(s=>s.id===sessionId);
+  if(si>=0){allSessions[si].lv_total=newAvg;allSessions[si].duration=remaining.length+' مكالمات';}
+  hideLoad();renderSummary();renderHistory();renderSidebar();renderAllTable();updateStats();renderTop3();renderTrainerFinalScore();
+  notify('تم حذف المكالمة');
+}
+
+function openEditCall(callId){
+  const call=allCallDetails.find(c=>c.id===callId);
+  if(!call)return;
+  // Build edit modal
+  const CRITERIA_FLAT=[];
+  const CRIT=[
+    {id:'opening',label:'Call Opening',maxPts:20,items:[
+      {id:'greeting',label:'إلقاء التحية بحسب قوانين قسم خدمة الزبائن',pts:3},
+      {id:'readiness',label:'الجاهزية والاستعداد التام لاستلام المكالمات في الوقت المحدد',pts:8},
+      {id:'empathy',label:'التعاطف والتكلم بأسلوب ودود ولبق مع الزبون',pts:6},
+      {id:'speed',label:'التكلم بسرعة مقبولة ومناسبة بحيث يتسنى للزبون استيعاب المعلومات',pts:3},
+    ]},
+    {id:'comm',label:'Communication Skills',maxPts:21,items:[
+      {id:'polite',label:'استخدام الأسلوب الرسمي المناسب والعبارات المهذبة أثناء مخاطبة الزبون',pts:8},
+      {id:'sequence',label:'التسلسل المنطقي لخطوات المكالمة النموذجية',pts:8},
+      {id:'listen',label:'الاستماع بانتباه وبدون مقاطعة الزبون',pts:5},
+    ]},
+    {id:'problem',label:'Problem Identification',maxPts:15,items:[
+      {id:'speed_id',label:'السرعة بتحديد احتياجات الزبون / دون تكرار معلوماته أو طلبه',pts:10},
+      {id:'questions',label:'مدى فاعلية وأهمية الأسئلة الموجهة للزبائن',pts:5},
+    ]},
+    {id:'knowledge',label:'Knowledge',maxPts:15,items:[
+      {id:'accuracy',label:'التركيز مع تزويد الزبون بمعلومات صحيحة',pts:15},
+    ]},
+    {id:'hold',label:'Hold Process',maxPts:8,items:[
+      {id:'ask_hold',label:'وضع الزبون على الانتظار بالحالات الضرورية + الاستئذان من الزبون قبل الشروع',pts:5},
+      {id:'thank_hold',label:'شكر الزبون لبقائه على الانتظار',pts:3},
+    ]},
+    {id:'aht',label:'AHT (Average Handled Taking)',maxPts:8,items:[
+      {id:'aht_score',label:'معدل مدة المكالمة',pts:8},
+    ]},
+    {id:'closing',label:'Call Ending',maxPts:13,items:[
+      {id:'addon',label:'التأكد من أن هل لدى الزبون إضافة على الطلب / السرعة بالسؤال / تكرار السؤال عن الإضافة',pts:5},
+      {id:'delivery',label:'التبليغ بأقصى وقت للحجز / ذكر وقت التوصيل مع ذكر تكلفة الطلب / إعادة طلب الزبون',pts:5},
+      {id:'farewell',label:'إنهاء المكالمة بتعبير شكراً لاتصالك اتمنالك يوم سعيد',pts:3},
+    ]},
+  ];
+  const scores=call.scores||{};
+  let itemsHtml='';
+  CRIT.forEach(axis=>{
+    itemsHtml+=`<div style="font-size:11px;font-weight:700;color:#0D1B3E;margin:8px 0 4px;border-right:3px solid #C8962E;padding-right:6px;">${axis.label}</div>`;
+    axis.items.forEach(item=>{
+      const cur=scores[item.id]||0;
+      const fp=item.pts,hp=parseFloat((item.pts/2).toFixed(1));
+      itemsHtml+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;border-radius:6px;background:#F4F5F7;margin-bottom:2px;">
+        <span style="font-size:11px;">${item.label}</span>
+        <select id="edit-${item.id}" style="width:70px;font-size:12px;padding:2px 4px;margin:0;">
+          <option value="0" ${cur===0?'selected':''}>0</option>
+          <option value="${hp}" ${cur===hp?'selected':''}>${hp} (½)</option>
+          <option value="${fp}" ${cur===fp?'selected':''}>${fp} (✓)</option>
+        </select>
+      </div>`;
+    });
+  });
+  const modal=document.createElement('div');
+  modal.id='edit-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML=`<div style="background:#fff;border-radius:16px;padding:20px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="font-size:15px;font-weight:700;color:#0D1B3E;">✏️ تعديل مكالمة ${call.call_num}</div>
+      <button onclick="document.getElementById('edit-modal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+      <div><label>رقم الهاتف</label><input type="tel" id="edit-phone" value="${call.phone||''}" style="margin:0;"></div>
+      <div><label>المدة</label><input type="text" id="edit-dur" value="${call.call_dur||''}" style="margin:0;"></div>
+    </div>
+    ${itemsHtml}
+    <div style="background:#0D1B3E;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin:10px 0;">
+      <span style="color:#FFF3DC;font-size:12px;">المجموع الجديد</span>
+      <span id="edit-total" style="color:#C8962E;font-size:20px;font-weight:700;">0</span>
+    </div>
+    <button onclick="saveEditCall('${callId}','${call.session_id}')" class="btn btn-gold" style="width:100%;">💾 حفظ التعديل</button>
+  </div>`;
+  document.body.appendChild(modal);
+  // Live total update
+  modal.querySelectorAll('select').forEach(sel=>sel.addEventListener('change',()=>{
+    const t=CRIT.flatMap(a=>a.items).reduce((sum,item)=>{const el=document.getElementById('edit-'+item.id);return sum+(el?parseFloat(el.value)||0:0);},0);
+    document.getElementById('edit-total').textContent=Math.round(t*10)/10;
+  }));
+  // Initial total
+  const initT=CRIT.flatMap(a=>a.items).reduce((sum,item)=>{const el=document.getElementById('edit-'+item.id);return sum+(el?parseFloat(el.value)||0:0);},0);
+  document.getElementById('edit-total').textContent=Math.round(initT*10)/10;
+}
+
+async function saveEditCall(callId,sessionId){
+  const CRIT_ITEMS=[
+    {id:'greeting',pts:3},{id:'readiness',pts:8},{id:'empathy',pts:6},{id:'speed',pts:3},
+    {id:'polite',pts:8},{id:'sequence',pts:8},{id:'listen',pts:5},
+    {id:'speed_id',pts:10},{id:'questions',pts:5},
+    {id:'accuracy',pts:15},
+    {id:'ask_hold',pts:5},{id:'thank_hold',pts:3},
+    {id:'aht_score',pts:8},
+    {id:'addon',pts:5},{id:'delivery',pts:5},{id:'farewell',pts:3}
+  ];
+  const newScores={};
+  let newTotal=0;
+  CRIT_ITEMS.forEach(item=>{const el=document.getElementById('edit-'+item.id);if(el){const v=parseFloat(el.value)||0;newScores[item.id]=v;newTotal+=v;}});
+  newTotal=Math.round(newTotal*10)/10;
+  const newPhone=document.getElementById('edit-phone')?.value.trim()||'';
+  const newDur=document.getElementById('edit-dur')?.value.trim()||'';
+  showLoad();
+  await sb.from('call_details').update({scores:newScores,total:newTotal,phone:newPhone,call_dur:newDur}).eq('id',callId);
+  const ci=allCallDetails.findIndex(c=>c.id===callId);
+  if(ci>=0){allCallDetails[ci].scores=newScores;allCallDetails[ci].total=newTotal;allCallDetails[ci].phone=newPhone;allCallDetails[ci].call_dur=newDur;}
+  // Recalculate session average
+  const remaining=allCallDetails.filter(c=>c.session_id===sessionId);
+  const newAvg=remaining.length?Math.round(remaining.reduce((a,c)=>a+c.total,0)/remaining.length*10)/10:0;
+  await sb.from('sessions').update({lv_total:newAvg}).eq('id',sessionId);
+  const si=allSessions.findIndex(s=>s.id===sessionId);
+  if(si>=0)allSessions[si].lv_total=newAvg;
+  hideLoad();
+  document.getElementById('edit-modal')?.remove();
+  renderSummary();renderHistory();renderSidebar();renderAllTable();updateStats();renderTop3();renderTrainerFinalScore();
+  notify('✓ تم التعديل — المجموع الجديد: '+newTotal+'/100');
+}
+
+function renderHistory(){
+  const ms=getSessionsByMonth(currentEmp.id,historyMonthOffset);
+  const card=document.getElementById('history-card'),list=document.getElementById('history-list');
+  card.style.display='block';
+  const now=new Date();
+  const target=new Date(now.getFullYear(),now.getMonth()+historyMonthOffset,1);
+  const monthLabel=target.toLocaleDateString('ar-IQ',{month:'long',year:'numeric'});
+  const labelEl=document.getElementById('history-month-label');
+  if(labelEl)labelEl.textContent=monthLabel+(historyMonthOffset===0?' (الشهر الحالي)':'');
+  if(!ms.length){list.innerHTML='<div class="empty">لا توجد جلسات في هذا الشهر</div>';return;}
+  list.innerHTML=[...ms].reverse().map(s=>{
+    const calls=allCallDetails.filter(c=>c.session_id===s.id).sort((a,b)=>a.call_num-b.call_num);
+    const callsHtml=calls.map(c=>{
+      const col=c.total>=80?'#1A6B3C':c.total>=60?'#C8962E':'#8B1A1A';
+      const meta=[c.phone,c.call_date,c.call_time,c.call_dur].filter(Boolean).join(' | ');
+      const vt=(c.voice_tags||[]).map(t=>`<span style="font-size:10px;padding:2px 6px;border-radius:10px;background:${t.val==='pos'?'#E8F5EE':'#FFF0F0'};color:${t.val==='pos'?'#1A6B3C':'#8B1A1A'};">${t.val==='pos'?'✓':'✗'} ${t.label}</span>`).join('');
+      // Build scores detail
+      const sc=c.scores||{};
+      const scHtml=Object.entries(sc).filter(([k,v])=>v>0).map(([k,v])=>`<span style="font-size:10px;color:#555;">${k}: ${v}</span>`).join(' • ');
+      return `<div style="background:#F4F5F7;border-radius:8px;padding:10px;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:12px;font-weight:700;color:#0D1B3E;">📞 مكالمة ${c.call_num}</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:15px;font-weight:700;color:${col};">${c.total}/100</span>
+            <button onclick="openEditCall('${c.id}')" style="background:#E6F1FB;color:#185FA5;border:none;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-weight:700;">✏️ تعديل</button>
+            <button onclick="deleteCall('${c.id}','${s.id}')" style="background:#FFF0F0;color:#8B1A1A;border:none;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-weight:700;">✕ حذف</button>
+          </div>
+        </div>
+        ${meta?`<div style="font-size:11px;color:#888;margin-bottom:4px;">${meta}</div>`:''}
+        ${vt?`<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">${vt}</div>`:''}
+        ${c.recording_url?`<audio controls style="width:100%;height:32px;margin-top:4px;" src="${c.recording_url}"></audio>`:''}
+      </div>`;
+    }).join('');
+    return `<div style="border-top:1px solid #f0f0f0;padding:10px 0;">
+      <div style="display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="toggleSession('${s.id}')">
+        <div style="text-align:center;min-width:44px;">
+          <div style="font-size:18px;font-weight:700;color:${scoreColor(s.lv_total||0)};">${s.lv_total||'—'}</div>
+          <div style="font-size:10px;color:#888;">/100</div>
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+            ${s.lv_total?`<span class="badge badge-gold">${s.lv_total}/100</span>`:''}
+            <span class="badge badge-blue">${s.date||''}</span>
+            ${calls.length?`<span class="badge badge-gray">${calls.length} مكالمات</span>`:''}
+            ${s.promotion?`<span class="badge badge-green">ترويج: ${s.promotion}/50</span>`:''}
+          </div>
+          ${s.note?`<div style="font-size:11px;color:#888;margin-top:2px;">${s.note}</div>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span id="arrow-${s.id}" style="color:#C8962E;font-size:14px;">▼</span>
+          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteSession('${s.id}')">✕</button>
+        </div>
+      </div>
+      <div id="detail-${s.id}" style="display:none;margin-top:10px;">${callsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderChart(){
+  const all=allSessions.filter(s=>s.employee_id===currentEmp.id&&s.lv_total>0).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(all.length<2)return;
+  const ctx=document.getElementById('progress-chart').getContext('2d');
+  if(chartInst)chartInst.destroy();
+  chartInst=new Chart(ctx,{type:'line',data:{labels:all.map(s=>s.date||''),datasets:[{label:'المكالمات',data:all.map(s=>s.lv_total||0),borderColor:'#C8962E',backgroundColor:'rgba(200,150,46,0.08)',tension:0.3,fill:true,pointRadius:4,pointBackgroundColor:'#C8962E'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100},x:{ticks:{maxRotation:45,font:{size:10}}}}}});
+}
+
+function renderAllTable(){
+  const wrap=document.getElementById('all-table-wrap');
+  if(!allEmployees.length){wrap.innerHTML='<div class="empty">لم يُضف أي موظف بعد</div>';return;}
+  const rows=allEmployees.map(emp=>{
+    const calls=calcCallsScore(emp.id),errors=calcErrorsScore(emp.name),quiz=getQuizScore(emp.id),promotion=calcPromotionScore(emp.id),final=calcFinalScore(emp.id,emp.name);
+    const fcol=final!==null?scoreClass(final):'score-none';
+    const warn=final!==null&&final<60?'⚠️ ':'';
+    return `<tr onclick="selectEmployee('${emp.id}')" style="cursor:pointer;"><td><strong>${emp.name}</strong></td><td style="text-align:center;">${calls!==null?calls:'—'}</td><td style="text-align:center;">${promotion!==null?promotion:'—'}</td><td style="text-align:center;">${errors}</td><td style="text-align:center;">${quiz!==null?quiz+'/50':'—'}</td><td style="text-align:center;">${final!==null?`<span class="score-pill ${fcol}">${warn}${final}</span>`:'<span class="score-pill score-none">—</span>'}</td></tr>`;
+  }).join('');
+  wrap.innerHTML=`<table class="all-table"><tr><th>الموظف</th><th style="text-align:center;">المكالمات /100</th><th style="text-align:center;">الترويج /50</th><th style="text-align:center;">الأخطاء /100</th><th style="text-align:center;">الكوز /50</th><th style="text-align:center;">التقييم النهائي</th></tr>${rows}</table>`;
+}
+
+function updateStats(){
+  let total=0,topName='—',lowName='—',topF=-1,lowF=101;
+  allEmployees.forEach(emp=>{
+    total+=getMonthSessions(emp.id).length;
+    const f=calcFinalScore(emp.id,emp.name);
+    if(f!==null){if(f>topF){topF=f;topName=emp.name;}if(f<lowF){lowF=f;lowName=emp.name;}}
+  });
+  document.getElementById('stat-sessions').textContent=total;
+  document.getElementById('stat-top').textContent=topName;
+  document.getElementById('stat-low').textContent=lowName;
+}
+
+async function addEmployee(){
+  const name=document.getElementById('new-emp-name').value.trim();
+  const username=document.getElementById('new-emp-user').value.trim();
+  const password=document.getElementById('new-emp-pass').value.trim();
+  const gender=document.getElementById('new-emp-gender').value;
+  if(!name||!username||!password){notify('أكمل جميع الحقول');return;}
+  showLoad();
+  const{data,error}=await sb.from('employees').insert([{name,username,password,gender}]).select().single();
+  if(error){hideLoad();notify('خطأ: '+error.message);return;}
+  allEmployees.push(data);
+  document.getElementById('new-emp-name').value='';
+  document.getElementById('new-emp-user').value='';
+  document.getElementById('new-emp-pass').value='';
+  document.getElementById('new-emp-gender').value='male';
+  hideLoad();renderSidebar();renderAllTable();updateStats();renderTop3();selectEmployee(data.id);
+  notify('✓ تم إضافة '+name);
+}
+
+async function deleteEmployee(){
+  if(!currentEmp)return;
+  if(!confirm('هل تريد حذف '+currentEmp.name+'؟'))return;
+  showLoad();
+  await sb.from('sessions').delete().eq('employee_id',currentEmp.id);
+  await sb.from('employees').delete().eq('id',currentEmp.id);
+  allEmployees=allEmployees.filter(e=>e.id!==currentEmp.id);
+  allSessions=allSessions.filter(s=>s.employee_id!==currentEmp.id);
+  currentEmp=null;hideLoad();
+  document.getElementById('emp-panel').style.display='none';
+  document.getElementById('no-selection').style.display='block';
+  document.getElementById('all-card').style.display='block';
+  renderSidebar();renderAllTable();updateStats();renderTop3();notify('تم الحذف');
+}
+
+async function resetQuizScore(){
+  if(!currentEmp)return;
+  if(!confirm('تصفير درجة الكوز لـ '+currentEmp.name+'؟ هذا يُستخدم في بداية كل شهر.'))return;
+  showLoad();
+  const{error}=await sb.from('employees').update({quiz_score:0}).eq('id',currentEmp.id);
+  if(error){hideLoad();notify('خطأ: '+error.message);return;}
+  currentEmp.quiz_score=0;
+  const idx=allEmployees.findIndex(e=>e.id===currentEmp.id);
+  if(idx>=0)allEmployees[idx].quiz_score=0;
+  hideLoad();
+  renderSummary();renderAllTable();updateStats();renderTop3();renderTrainerFinalScore();
+  notify('✓ تم تصفير درجة الكوز');
+}
+
+async function saveQuizScore(){
+  if(!currentEmp){notify('اختر موظفاً أولاً');return;}
+  const score=parseFloat(document.getElementById('quiz-score')?.value||0);
+  if(isNaN(score)||score<0||score>10){notify('أدخل درجة بين 0 و 10');return;}
+  showLoad();
+  const currentQuiz=currentEmp.quiz_score||0;
+  const newQuiz=Math.min(50,currentQuiz+score);
+  const{error}=await sb.from('employees').update({quiz_score:newQuiz}).eq('id',currentEmp.id);
+  if(error){hideLoad();notify('خطأ: '+error.message);return;}
+  currentEmp.quiz_score=newQuiz;
+  const idx=allEmployees.findIndex(e=>e.id===currentEmp.id);
+  if(idx>=0)allEmployees[idx].quiz_score=newQuiz;
+  hideLoad();
+  renderSummary();renderHistory();renderAllTable();updateStats();renderTop3();renderTrainerFinalScore();
+  notify('✓ تم إضافة '+score+' — المجموع: '+newQuiz+'/50');
+}
+
+async function deleteSession(id){
+  if(!confirm('حذف هذه الجلسة؟'))return;
+  showLoad();
+  await sb.from('sessions').delete().eq('id',id);
+  allSessions=allSessions.filter(s=>s.id!==id);
+  hideLoad();renderSummary();renderHistory();renderChart();renderSidebar();renderAllTable();updateStats();renderTop3();renderTrainerFinalScore();
+  notify('تم الحذف');
+}
+
+// ── CRITERIA ──
+const CRITERIA=[
+  {id:'opening',label:'Call Opening',maxPts:20,items:[
+    {id:'greeting',label:'إلقاء التحية بحسب قوانين قسم خدمة الزبائن',pts:3},
+    {id:'readiness',label:'الجاهزية والاستعداد التام لاستلام المكالمات في الوقت المحدد',pts:8},
+    {id:'empathy',label:'التعاطف والتكلم بأسلوب ودود ولبق مع الزبون',pts:6},
+    {id:'speed',label:'التكلم بسرعة مقبولة ومناسبة بحيث يتسنى للزبون استيعاب المعلومات المزوّدة إليه',pts:3},
+  ]},
+  {id:'comm',label:'Communication Skills',maxPts:21,items:[
+    {id:'polite',label:'استخدام الأسلوب الرسمي المناسب والعبارات المهذبة أثناء مخاطبة الزبون مثل "عزيزي أو أستاذ"، "أرجو المعذرة"، "لو سمحت، حضرتك، العفو"',pts:8},
+    {id:'sequence',label:'التسلسل المنطقي لخطوات المكالمة النموذجية',pts:8},
+    {id:'listen',label:'الاستماع بانتباه وبدون مقاطعة الزبون',pts:5},
+  ]},
+  {id:'problem',label:'Problem Identification',maxPts:15,items:[
+    {id:'speed_id',label:'السرعة بتحديد احتياجات الزبون / دون تكرار معلوماته أو طلبه',pts:10},
+    {id:'questions',label:'مدى فاعلية وأهمية الأسئلة الموجهة للزبائن',pts:5},
+  ]},
+  {id:'knowledge',label:'Knowledge',maxPts:15,items:[
+    {id:'accuracy',label:'التركيز مع تزويد الزبون بمعلومات صحيحة',pts:15},
+  ]},
+  {id:'hold',label:'Hold Process',maxPts:8,items:[
+    {id:'ask_hold',label:'وضع الزبون على الانتظار بالحالات الضرورية وبمدة معقولة ومقبولة + الاستئذان من الزبون وإبلاغه بأنه سيتم وضعه على الانتظار قبل الشروع بذلك',pts:5},
+    {id:'thank_hold',label:'شكر الزبون لبقائه على الانتظار',pts:3},
+  ]},
+  {id:'aht',label:'AHT (Average Handled Taking)',maxPts:8,items:[
+    {id:'aht_score',label:'معدل مدة المكالمة',pts:8},
+  ]},
+  {id:'closing',label:'Call Ending',maxPts:13,items:[
+    {id:'addon',label:'التأكد من أن هل لدى الزبون إضافة على الطلب / السرعة بالسؤال عن الإضافة / تكرار السؤال عن الإضافة',pts:5},
+    {id:'delivery',label:'التبليغ بأقصى وقت للحجز / ذكر وقت التوصيل مع ذكر تكلفة الطلب / إعادة طلب الزبون',pts:5},
+    {id:'farewell',label:'إنهاء المكالمة بتعبير شكراً لاتصالك اتمنالك يوم سعيد',pts:3},
+  ]},
+];
+function previewAudio(input){
+  if(!input.files||!input.files[0])return;
+  const file=input.files[0];
+  const url=URL.createObjectURL(file);
+  const player=document.getElementById('lv-audio-player');
+  const preview=document.getElementById('lv-audio-preview');
+  if(player&&preview){
+    player.src=url;
+    preview.style.display='block';
+  }
+}
+
+function autoFillPhone(input){
+  if(!input.files||!input.files[0])return;
+  const name=input.files[0].name;
+  const match=name.match(/(07[789]\d{8})/);
+  if(match){
+    const info=document.getElementById('lv-call-info');
+    if(info&&!info.value.includes('077')&&!info.value.includes('078')&&!info.value.includes('079')){
+      info.value=match[1]+'\n'+(info.value||'');
+    }
+  }
+}
+
+function getCallInfoText(){
+  return document.getElementById('lv-call-info')?.value.trim()||'';
+}
+
+function resetCallInfo(){
+  const el=document.getElementById('lv-call-info');
+  if(el)el.value='';
+}
+
+let lvScores={};
+let lvTimer=null,lvSeconds=0,lvRunning=false,lvCalls=[],lvCurrentCall=1,lvVoiceTags=[],lvAutoNotes=[];
+function buildCriteriaForm(){
+  const form=document.getElementById('lv-criteria-form');if(!form)return;
+  let html='';
+  // Initialize all scores to full (default ON)
+  CRITERIA.forEach(axis=>{
+    axis.items.forEach(item=>{
+      if(lvScores[item.id]===undefined)lvScores[item.id]=item.pts;
+    });
+  });
+  CRITERIA.forEach(axis=>{
+    html+=`<div class="axis-header">${axis.label} <span style="color:#C8962E;font-size:11px;">(${axis.maxPts} درجة)</span></div>`;
+    axis.items.forEach(item=>{html+=`<div class="criteria-row"><div class="criteria-label">${item.label}</div><div class="criteria-pts">${item.pts} د</div><div class="criteria-score" id="dots-${item.id}">${buildDots(item.id,item.pts)}</div></div>`;});
+  });
+  form.innerHTML=html;updateTotal();
+}
+
+function lvPrevCall(){
+  if(lvCurrentCall<=1)return;
+  // Save current call state first
+  const total=Object.values(lvScores).reduce((a,b)=>a+b,0);
+  const existingIdx=lvCalls.findIndex(c=>c.num===lvCurrentCall);
+  if(existingIdx>=0){
+    lvCalls[existingIdx]={...lvCalls[existingIdx],scores:{...lvScores},total:Math.round(total*10)/10,callInfo:getCallInfoText(),voiceTags:[...lvVoiceTags]};
+  } else if(total>0||lvVoiceTags.length>0){
+    lvCalls.push({num:lvCurrentCall,scores:{...lvScores},total:Math.round(total*10)/10,callInfo:getCallInfoText(),voiceTags:[...lvVoiceTags],recordingUrl:null});
+  }
+  // Go to previous call
+  lvCurrentCall--;
+  document.getElementById('lv-call-num').textContent=lvCurrentCall;
+  // Load previous call data
+  const prev=lvCalls.find(c=>c.num===lvCurrentCall);
+  lvScores=prev?{...prev.scores}:{};
+  lvVoiceTags=prev?[...prev.voiceTags]:[];
+  // Reset form with previous data
+  CRITERIA.forEach(axis=>{axis.items.forEach(item=>{if(lvScores[item.id]===undefined)lvScores[item.id]=item.pts;});});
+  buildCriteriaForm();
+  // Update call info
+  const info=document.getElementById('lv-call-info');
+  if(info)info.value=prev?.callInfo||'';
+  // Update voice tags display
+  document.querySelectorAll('.vn-btn').forEach(b=>{
+    b.classList.remove('active');
+    if(lvVoiceTags.find(t=>t.id===b.dataset.id))b.classList.add('active');
+  });
+  document.getElementById('vn-tags').innerHTML=lvVoiceTags.map(t=>`<span class="vn-pill ${t.val}">${t.val==='pos'?'✓':'✗'} ${t.label}</span>`).join('');
+  // Update buttons
+  updateNavButtons();
+  lvRenderSummary();
+  notify('← رجعت للمكالمة '+lvCurrentCall);
+}
+
+function updateNavButtons(){
+  const prevBtn=document.getElementById('lv-prev-btn');
+  if(prevBtn){
+    if(lvCurrentCall>1){prevBtn.style.opacity='1';prevBtn.style.pointerEvents='auto';}
+    else{prevBtn.style.opacity='0.3';prevBtn.style.pointerEvents='none';}
+  }
+}
+function buildDots(itemId,pts){
+  const fp=pts,hp=parseFloat((pts/2).toFixed(1));
+  return [{val:0,label:'0'},{val:hp,label:'½'},{val:fp,label:'✓'}].map(opt=>{
+    const sel=(lvScores[itemId]===opt.val)?(opt.val===fp?'selected':'partial'):'';
+    return `<div class="score-dot ${sel}" onclick="setScore('${itemId}',${opt.val},${fp})">${opt.label}</div>`;
+  }).join('');
+}
+function setScore(itemId,val,maxPts){
+  lvScores[itemId]=val;
+  const c=document.getElementById('dots-'+itemId);
+  if(c)c.innerHTML=buildDots(itemId,maxPts);
+  updateTotal();
+  // Auto-add note when item turned off (score = 0)
+  if(val===0){
+    const item=CRITERIA.flatMap(a=>a.items).find(i=>i.id===itemId);
+    if(item){
+      // Add to auto-notes
+      if(!lvAutoNotes.includes(item.label)){
+        lvAutoNotes.push(item.label);
+        updateAutoNotesDisplay();
+      }
+    }
+  } else {
+    // Remove from auto-notes if turned back on
+    const item=CRITERIA.flatMap(a=>a.items).find(i=>i.id===itemId);
+    if(item){
+      lvAutoNotes=lvAutoNotes.filter(n=>n!==item.label);
+      updateAutoNotesDisplay();
+    }
+  }
+}
+
+function updateAutoNotesDisplay(){
+  const el=document.getElementById('lv-auto-notes');
+  if(!el)return;
+  if(!lvAutoNotes.length){el.style.display='none';return;}
+  el.style.display='block';
+  el.innerHTML=`<div style="font-size:11px;font-weight:700;color:#8B1A1A;margin-bottom:4px;">⚠️ ملاحظات تلقائية (بنود مطفأة):</div>`+
+  lvAutoNotes.map(n=>`<div style="font-size:11px;color:#8B1A1A;">• ${n}</div>`).join('');
+}
+function updateTotal(){const t=Object.values(lvScores).reduce((a,b)=>a+b,0);const el=document.getElementById('lv-total');if(el)el.textContent=Math.round(t*10)/10;}
+
+function lvToggleTimer(){
+  lvRunning=!lvRunning;const btn=document.getElementById('lv-timer-btn');
+  if(lvRunning){btn.textContent='⏸';lvTimer=setInterval(()=>{lvSeconds++;const m=Math.floor(lvSeconds/60),s=lvSeconds%60;document.getElementById('lv-timer').textContent=m+':'+String(s).padStart(2,'0');},1000);}
+  else{btn.textContent='▶ استمرار';clearInterval(lvTimer);}
+}
+function vnTag(btn){
+  const id=btn.dataset.id,label=btn.dataset.label,val=btn.classList.contains('pos')?'pos':'neg';
+  const idx=lvVoiceTags.findIndex(t=>t.id===id);
+  if(idx>=0){lvVoiceTags.splice(idx,1);btn.classList.remove('active');}else{lvVoiceTags.push({id,label,val});btn.classList.add('active');}
+  const area=document.getElementById('vn-tags');if(!area)return;
+  area.innerHTML=lvVoiceTags.map((t,i)=>`<span class="vn-pill ${t.val}">${t.val==='pos'?'✓':'✗'} ${t.label}</span>`).join('');
+}
+async function uploadRecording(callNum){
+  const fileInput=document.getElementById('lv-recording');
+  if(!fileInput||!fileInput.files||!fileInput.files[0])return null;
+  const file=fileInput.files[0];
+  const ext=file.name.split('.').pop();
+  const path=`${currentEmp.id}/call_${Date.now()}_${callNum}.${ext}`;
+  const status=document.getElementById('lv-upload-status');
+  if(status)status.textContent='⏳ جاري الرفع...';
+  const{data,error}=await sb.storage.from('call-recordings').upload(path,file,{contentType:file.type,upsert:true});
+  if(error){if(status)status.textContent='❌ فشل الرفع';return null;}
+  const{data:urlData}=sb.storage.from('call-recordings').getPublicUrl(path);
+  if(status)status.textContent='✅ تم الرفع';
+  fileInput.value='';
+  setTimeout(()=>{if(status)status.textContent='';},2000);
+  return urlData.publicUrl;
+}
+
+async function lvNextCall(){
+  const total=Object.values(lvScores).reduce((a,b)=>a+b,0);
+  if(total===0&&lvVoiceTags.length===0){notify('سجّل درجة أو ملاحظة على الأقل');return;}
+  const recordingUrl=await uploadRecording(lvCurrentCall);
+  const callInfo=getCallInfoText();
+  const autoNotesText=lvAutoNotes.length?'ملاحظات: '+lvAutoNotes.join(' | '):'';
+  // Update existing or push new
+  const existingIdx=lvCalls.findIndex(c=>c.num===lvCurrentCall);
+  const callData={num:lvCurrentCall,scores:{...lvScores},total:Math.round(total*10)/10,callInfo,autoNotes:[...lvAutoNotes],voiceTags:[...lvVoiceTags],recordingUrl};
+  if(existingIdx>=0)lvCalls[existingIdx]=callData;
+  else lvCalls.push(callData);
+  lvCurrentCall++;
+  document.getElementById('lv-call-num').textContent=lvCurrentCall;
+  // Check if next call already exists
+  const nextCall=lvCalls.find(c=>c.num===lvCurrentCall);
+  lvScores=nextCall?{...nextCall.scores}:{};
+  lvVoiceTags=nextCall?[...nextCall.voiceTags]:[];
+  lvAutoNotes=nextCall?[...nextCall.autoNotes]:[];
+  // Reset form
+  if(!nextCall){CRITERIA.forEach(axis=>{axis.items.forEach(item=>{lvScores[item.id]=item.pts;});});}
+  lvSeconds=0;lvRunning=false;clearInterval(lvTimer);
+  document.getElementById('lv-timer').textContent='0:00';
+  document.getElementById('lv-timer-btn').textContent='▶ ابدأ';
+  const info=document.getElementById('lv-call-info');
+  if(info)info.value=nextCall?.callInfo||'';
+  document.querySelectorAll('.vn-btn').forEach(b=>{
+    b.classList.remove('active');
+    if(lvVoiceTags.find(t=>t.id===b.dataset.id))b.classList.add('active');
+  });
+  document.getElementById('vn-tags').innerHTML=lvVoiceTags.map(t=>`<span class="vn-pill ${t.val}">${t.val==='pos'?'✓':'✗'} ${t.label}</span>`).join('');
+  buildCriteriaForm();
+  updateAutoNotesDisplay();
+  updateNavButtons();
+  lvRenderSummary();
+  notify('✓ مكالمة '+(lvCurrentCall-1)+' محفوظة — ابدأ التالية');
+}
+function lvRenderSummary(){
+  const div=document.getElementById('lv-calls-summary');if(!lvCalls.length){div.innerHTML='';return;}
+  div.innerHTML=`<p style="font-size:11px;font-weight:700;color:#0D1B3E;margin-bottom:5px;">المكالمات المسجلة (${lvCalls.length})</p>`+lvCalls.map(call=>{
+    const col=call.total>=80?'#1A6B3C':call.total>=60?'#C8962E':'#8B1A1A';
+    const meta=[call.phone,call.callDate,call.callTime,call.callDur?call.callDur:''].filter(Boolean).join(' | ');
+    return `<div style="background:#fff;border-radius:7px;border:1px solid #eee;padding:7px 10px;margin-bottom:3px;display:flex;align-items:center;gap:8px;"><span style="font-size:12px;font-weight:700;color:#0D1B3E;">م${call.num}</span><span style="font-size:11px;color:#888;flex:1;">${meta}</span><span style="font-size:14px;font-weight:700;color:${col};">${call.total}/100</span></div>`;
+  }).join('');
+}
+async function lvSaveAll(){
+  if(!currentEmp){notify('اختر موظفاً أولاً');return;}
+  const allCalls=[...lvCalls];
+  const curTotal=Object.values(lvScores).reduce((a,b)=>a+b,0);
+  if(curTotal>0||lvVoiceTags.length>0){
+    const recordingUrl=await uploadRecording(lvCurrentCall);
+    const callInfo=getCallInfoText();
+    allCalls.push({num:lvCurrentCall,scores:{...lvScores},total:Math.round(curTotal*10)/10,callInfo,autoNotes:[...lvAutoNotes],voiceTags:[...lvVoiceTags],recordingUrl});
+  }
+  if(!allCalls.length){notify('سجّل مكالمة واحدة على الأقل');return;}
+  const avgTotal=Math.round(allCalls.reduce((s,c)=>s+c.total,0)/allCalls.length*10)/10;
+  const promotion=parseFloat(document.getElementById('lv-promotion').value)||null;
+  const quizFromSession=parseFloat(document.getElementById('lv-quiz').value)||null;
+  const session={employee_id:currentEmp.id,date:document.getElementById('lv-date').value||new Date().toISOString().split('T')[0],duration:allCalls.length+' مكالمات',topic:'تقييم مكالمات مباشر',lv_total:avgTotal,promotion,note:document.getElementById('lv-note').value.trim()};
+  if(quizFromSession!==null){
+    const currentQuiz=currentEmp.quiz_score||0;
+    const newQuiz=Math.min(50,currentQuiz+quizFromSession);
+    await sb.from('employees').update({quiz_score:newQuiz}).eq('id',currentEmp.id);
+    currentEmp.quiz_score=newQuiz;
+    const idx=allEmployees.findIndex(e=>e.id===currentEmp.id);
+    if(idx>=0)allEmployees[idx].quiz_score=newQuiz;
+  }
+  showLoad();
+  const{data,error}=await sb.from('sessions').insert([session]).select().single();
+  if(error){hideLoad();notify('خطأ: '+error.message);return;}
+  // Save each call details
+  const callDetailsInsert=allCalls.map(c=>({
+    session_id:data.id,
+    employee_id:currentEmp.id,
+    call_num:c.num,
+    phone:c.callInfo?.match(/(07[789]\d{8})/)?.[1]||null,
+    call_date:c.callInfo?.match(/\d{2}\/\d{2}\/\d{4}/)?.[0]||null,
+    call_time:c.callInfo?.match(/\d{1,2}:\d{2}\s*[APM]{2}/i)?.[0]||null,
+    call_dur:c.callInfo?.match(/مدة[:\s]*([\d:]+)/)?.[1]||null,
+    total:c.total,
+    scores:c.scores,
+    voice_tags:c.voiceTags,
+    recording_url:c.recordingUrl||null,
+    notes:c.autoNotes?.length?'ملاحظات: '+c.autoNotes.join(' | '):null,
+    call_info:c.callInfo||null
+  }));
+  await sb.from('call_details').insert(callDetailsInsert);
+  allSessions.push(data);
+  lvCalls=[];lvCurrentCall=1;lvScores={};lvVoiceTags=[];lvAutoNotes=[];lvSeconds=0;lvRunning=false;clearInterval(lvTimer);
+  document.getElementById('lv-timer').textContent='0:00';document.getElementById('lv-call-num').textContent='1';
+  document.getElementById('lv-timer-btn').textContent='▶ ابدأ';document.getElementById('lv-note').value='';document.getElementById('lv-promotion').value='';if(document.getElementById('lv-quiz'))document.getElementById('lv-quiz').value='';
+  resetCallInfo();
+  const preview=document.getElementById('lv-audio-preview');
+  if(preview)preview.style.display='none';
+  const player=document.getElementById('lv-audio-player');
+  if(player)player.src='';
+  document.querySelectorAll('.vn-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('vn-tags').innerHTML='';
+  const autoNotesEl=document.getElementById('lv-auto-notes');
+  if(autoNotesEl)autoNotesEl.style.display='none';
+  updateNavButtons();
+  buildCriteriaForm();lvRenderSummary();hideLoad();
+  renderSummary();renderHistory();renderChart();renderSidebar();renderAllTable();updateStats();renderTop3();renderTrainerFinalScore();
+  notify('✓ تم الحفظ — معدل '+avgTotal+'/100 من '+allCalls.length+' مكالمات');
+}
+
+// ── MONTHLY REPORT ──
+function generateMonthlyReport(){
+  if(!allEmployees.length){alert('لا يوجد موظفون');return;}
+  const now=new Date(),monthName=now.toLocaleDateString('ar-IQ',{month:'long',year:'numeric'});
+  // Build rows with editable notes
+  const rows=allEmployees.map((emp,i)=>{
+    const calls=calcCallsScore(emp.id),errors=calcErrorsScore(emp.name),quiz=getQuizScore(emp.id),promotion=calcPromotionScore(emp.id),final=calcFinalScore(emp.id,emp.name);
+    const ms=getMonthSessions(emp.id);
+    const warn=final!==null&&final<60?'⚠️ تنبيه':'✅';
+    const warnColor=final!==null&&final<60?'#8B1A1A':'#1A6B3C';
+    const fcol=final!==null?(final>=80?'#1A6B3C':final>=60?'#C8962E':'#8B1A1A'):'#888';
+    return `<tr>
+      <td style="font-weight:700;color:#0D1B3E;">${emp.name}</td>
+      <td style="text-align:center;">${ms.length}</td>
+      <td style="text-align:center;font-weight:700;color:${calls>=80?'#1A6B3C':calls>=60?'#C8962E':'#8B1A1A'};">${calls!==null?calls:'—'}</td>
+      <td style="text-align:center;font-weight:700;color:${promotion>=80?'#1A6B3C':promotion>=60?'#C8962E':'#8B1A1A'};">${promotion!==null?promotion:'—'}</td>
+      <td style="text-align:center;font-weight:700;color:${errors>=80?'#1A6B3C':errors>=60?'#C8962E':'#8B1A1A'};">${errors}</td>
+      <td style="text-align:center;font-weight:700;">${quiz!==null?quiz+'/50':'—'}</td>
+      <td style="text-align:center;font-size:18px;font-weight:700;color:${fcol};">${final!==null?final:'—'}</td>
+      <td style="text-align:center;color:${warnColor};font-weight:700;">${warn}</td>
+      <td><div contenteditable="true" style="min-width:120px;min-height:32px;border:1px dashed #ddd;border-radius:6px;padding:4px 8px;font-size:12px;color:#555;" placeholder="ملاحظة..."></div></td>
+    </tr>`;
+  }).join('');
+  const top3=allEmployees.map(emp=>({name:emp.name,score:calcFinalScore(emp.id,emp.name)})).filter(x=>x.score!==null).sort((a,b)=>b.score-a.score).slice(0,3);
+  const top3html=top3.map((e,i)=>`<div style="flex:1;background:#F4F5F7;border-radius:10px;padding:14px;text-align:center;border:2px solid ${['#C8962E','#A0A0B0','#B87333'][i]};"><div style="font-size:28px;">${['🥇','🥈','🥉'][i]}</div><div style="font-weight:700;color:#0D1B3E;margin-top:4px;">${e.name}</div><div style="font-size:22px;font-weight:700;color:#C8962E;">${e.score}</div></div>`).join('');
+  // Warning employees
+  const warnings=allEmployees.filter(emp=>{const f=calcFinalScore(emp.id,emp.name);return f!==null&&f<60;});
+  const warningsHtml=warnings.length?warnings.map(emp=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#FFF0F0;border-radius:8px;margin-bottom:4px;"><span style="font-size:16px;">⚠️</span><span style="font-weight:700;color:#8B1A1A;">${emp.name}</span><span style="font-size:12px;color:#888;">— درجته ${calcFinalScore(emp.id,emp.name)} من 100</span></div>`).join(''):'<div style="color:#1A6B3C;font-weight:700;">✅ لا يوجد موظفون تحت 60</div>';
+  // Auto-deleted errors
+  const autoDeleted=JSON.parse(localStorage.getItem('autoDeletedErrors')||'[]');
+  const autoDeletedHtml=autoDeleted.length?`<div class="sec"><div class="st">🗑️ أخطاء محذوفة تلقائياً (7 أيام بدون أخطاء)</div><table><tr><th>الموظف</th><th>نوع الخطأ المحذوف</th><th>تاريخ الخطأ</th><th>تاريخ الحذف التلقائي</th></tr>${autoDeleted.map(d=>`<tr><td style="font-weight:700;">${d.empName}</td><td>${d.errorType}</td><td>${d.errorDate}</td><td style="color:#1A6B3C;">${d.deletedAt} ✅</td></tr>`).join('')}</table></div>`:'';
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>التقرير الشهري — ${monthName}</title><style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#F4F5F7;direction:rtl;color:#1A1A2E;}
+.hdr{background:#0D1B3E;border-bottom:5px solid #C8962E;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;}
+.brand{font-size:22px;font-weight:700;color:#C8962E;}
+.sub{font-size:13px;color:#FFF3DC;margin-top:3px;}
+.dl{font-size:13px;color:#FFF3DC;text-align:left;}
+.c{max-width:1100px;margin:0 auto;padding:20px;}
+.sec{background:#fff;border-radius:12px;border:1px solid #eee;padding:18px;margin-bottom:16px;}
+.st{font-size:15px;font-weight:700;color:#0D1B3E;margin-bottom:14px;border-right:4px solid #C8962E;padding-right:10px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#0D1B3E;color:#C8962E;padding:10px;text-align:right;font-weight:600;}
+td{padding:9px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+tr:hover td{background:#FAFAFA;}
+.f{text-align:center;padding:16px;font-size:11px;color:#aaa;}
+[contenteditable]:focus{outline:2px solid #C8962E;border-color:#C8962E!important;}
+@media print{.np{display:none!important;}[contenteditable]{border:1px solid #ddd!important;}}
+</style></head><body>
+<div class="hdr">
+  <div><div class="brand">🍽️ بصرة ديلايت — مركز الاتصالات</div><div class="sub">التقرير الشهري للتدريب وتقويم الأداء</div></div>
+  <div class="dl">شهر: <strong style="color:#C8962E;font-size:16px;">${monthName}</strong><br><span style="font-size:11px;">صدر: ${now.toLocaleDateString('ar-IQ',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</span></div>
+</div>
+<div class="c">
+  ${top3.length?`<div class="sec"><div class="st">🏆 أفضل 3 موظفين هذا الشهر</div><div style="display:flex;gap:12px;">${top3html}</div></div>`:''}
+  ${warnings.length?`<div class="sec"><div class="st">⚠️ موظفون يحتاجون متابعة عاجلة</div>${warningsHtml}</div>`:''}
+  ${autoDeletedHtml}
+  <div class="sec">
+    <div class="st">تفاصيل تقييم الموظفين</div>
+    <table>
+      <tr>
+        <th>الموظف</th>
+        <th style="text-align:center;">الجلسات</th>
+        <th style="text-align:center;">المكالمات /100</th>
+        <th style="text-align:center;">الترويج /50</th>
+        <th style="text-align:center;">الأخطاء /100</th>
+        <th style="text-align:center;">الكوز /50</th>
+        <th style="text-align:center;">التقييم النهائي</th>
+        <th style="text-align:center;">الحالة</th>
+        <th>ملاحظة المدرب</th>
+      </tr>
+      ${rows}
+    </table>
+    <div style="font-size:11px;color:#888;margin-top:8px;">المعادلة: (المكالمات/100 + الأخطاء/100 + الكوز/50 + الترويج/50) ÷ 3 = التقييم النهائي من 100</div>
+  </div>
+  <div class="sec">
+    <div class="st">ملاحظات المدير للشهر القادم</div>
+    <div contenteditable="true" style="background:#F4F5F7;border-radius:8px;padding:14px;min-height:100px;font-size:13px;color:#555;border:1px dashed #ddd;">اكتب ملاحظاتك هنا...</div>
+  </div>
+  <div class="f">قسم التدريب وتقويم الأداء — بصرة ديلايت | ${now.toLocaleString('ar-IQ')}</div>
+  <div class="np" style="text-align:center;margin-bottom:20px;">
+    <button onclick="window.print()" style="background:#0D1B3E;color:#C8962E;border:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">🖨️ طباعة / حفظ PDF</button>
+  </div>
+</div>
+</body></html>`);
+  win.document.close();
+}
+
+function generateWeeklyReport(){
+  if(!allEmployees.length){alert('لا يوجد موظفون');return;}
+  const now=new Date(),ws=new Date(now);
+  ws.setDate(now.getDate()-now.getDay());
+  const wl=ws.toLocaleDateString('ar-IQ',{day:'numeric',month:'long',year:'numeric'});
+  function getWeekSess(empId,weeksAgo){
+    const start=new Date(now);start.setDate(now.getDate()-now.getDay()-7*weeksAgo);start.setHours(0,0,0,0);
+    const end=new Date(start);end.setDate(start.getDate()+7);
+    return allSessions.filter(s=>{if(s.employee_id!==empId||!s.date)return false;const d=new Date(s.date);return d>=start&&d<end;});
+  }
+  const rows=allEmployees.map(emp=>{
+    const th=getWeekSess(emp.id,0),pr=getWeekSess(emp.id,1);
+    const ta=th.filter(s=>s.lv_total>0).length?Math.round(th.filter(s=>s.lv_total>0).reduce((a,s)=>a+s.lv_total,0)/th.filter(s=>s.lv_total>0).length*10)/10:0;
+    const pa=pr.filter(s=>s.lv_total>0).length?Math.round(pr.filter(s=>s.lv_total>0).reduce((a,s)=>a+s.lv_total,0)/pr.filter(s=>s.lv_total>0).length*10)/10:0;
+    const diff=ta&&pa?ta-pa:0;
+    const ds=pa&&ta?(diff>=0?`▲ +${diff.toFixed(1)}`:`▼ ${diff.toFixed(1)}`):'—';
+    const dc=diff>0?'#1A6B3C':diff<0?'#8B1A1A':'#888';
+    return `<tr><td style="font-weight:700;">${emp.name}</td><td style="text-align:center;">${th.length}</td><td style="text-align:center;font-weight:700;color:${ta>=80?'#1A6B3C':ta>=60?'#C8962E':'#8B1A1A'};">${ta||'—'}</td><td style="text-align:center;color:${dc};font-weight:700;">${ds}</td></tr>`;
+  }).join('');
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>التقرير الأسبوعي</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#F4F5F7;direction:rtl;}.hdr{background:#0D1B3E;border-bottom:5px solid #C8962E;padding:20px 30px;}.brand{font-size:20px;font-weight:700;color:#C8962E;}.sub{font-size:13px;color:#FFF3DC;margin-top:3px;}.c{max-width:900px;margin:0 auto;padding:20px;}.sec{background:#fff;border-radius:12px;border:1px solid #eee;padding:18px;margin-bottom:16px;}.st{font-size:15px;font-weight:700;color:#0D1B3E;margin-bottom:14px;border-right:4px solid #C8962E;padding-right:10px;}table{width:100%;border-collapse:collapse;font-size:13px;}th{background:#0D1B3E;color:#C8962E;padding:10px;text-align:right;}td{padding:10px;border-bottom:1px solid #f0f0f0;}@media print{.np{display:none;}}</style></head><body><div class="hdr"><div class="brand">🍽️ بصرة ديلايت</div><div class="sub">التقرير الأسبوعي — أسبوع ${wl}</div></div><div class="c"><div class="sec"><div class="st">أداء الموظفين هذا الأسبوع</div><table><tr><th>الموظف</th><th style="text-align:center;">الجلسات</th><th style="text-align:center;">معدل المكالمات</th><th style="text-align:center;">التغيير</th></tr>${rows}</table></div><div class="np" style="text-align:center;padding-bottom:20px;"><button onclick="window.print()" style="background:#0D1B3E;color:#C8962E;border:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">🖨️ طباعة</button></div></div></body></html>`);
+  win.document.close();
+}
+</script>
+</body>
+</html>
